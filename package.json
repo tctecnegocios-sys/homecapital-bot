@@ -1,1 +1,13 @@
-{"name":"homecapital-bot","version":"1.0.0","main":"index.js","scripts":{"start":"node index.js"},"engines":{"node":">=18.0.0"}}
+{
+  "name": "homecapital-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "bot": "node index.js",
+    "app": "node serve.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

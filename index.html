@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Capital · ERP</title>
+<meta name="theme-color" content="#293172">
+<meta name="description" content="ERP da Home Capital — comercial, financeiro, jurídico, pessoas e portal.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ERP HC">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#0e1420;--panel:#161f2e;--panel2:#1d2837;--line:#27364a;--tx:#e7edf5;--tx2:#9fb0c3;--tx3:#6d7f94;
+--acc:#046bd2;--acc2:#4aa3f5;--ok:#3fb27f;--warn:#e0a63a;--bad:#e0603a;--info:#4a90d9;--violet:#8a7fd9;
+--lead:#4a90d9;--qual:#8a7fd9;--prop:#e0a63a;--mandato:#c9a15a;--fechado:#3fb27f;
+--comercial:#4a90d9;--operacional:#8a7fd9;--financeiro:#3fb27f;--juridico:#e0a63a;--rh:#e0603a;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh}
+.side{width:238px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+.brand{padding:22px 20px 16px;border-bottom:1px solid var(--line)}
+.brand .logo{font-weight:800;letter-spacing:.14em;font-size:15px}.brand .logo b{color:var(--acc)}
+.brand .sub{color:var(--tx3);font-size:10.5px;letter-spacing:.22em;margin-top:3px}
+.nav{padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:none;color:var(--tx2);padding:11px 13px;border-radius:9px;font-size:13.5px;cursor:pointer;transition:.15s;font-weight:500}
+.nav button:hover{background:var(--panel2);color:var(--tx)}.nav button.on{background:var(--panel2);color:var(--tx)}
+.nav .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.nav .modlabel{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:14px 13px 6px;font-weight:700}
+.side .foot{margin-top:auto;padding:16px 20px;border-top:1px solid var(--line);color:var(--tx3);font-size:11px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 30px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),transparent)}
+.top h1{font-size:19px;font-weight:700;display:flex;align-items:center;gap:10px}
+.top .mod{width:10px;height:10px;border-radius:50%}
+.top .mode{display:flex;align-items:center;gap:10px}
+.pill{padding:6px 13px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line)}
+.pill.mode-c{background:rgba(224,166,58,.13);color:var(--acc2);border-color:rgba(224,166,58,.35)}
+.pill.mode-r{background:rgba(63,178,127,.13);color:var(--ok);border-color:rgba(63,178,127,.35)}
+.pill.q{background:var(--panel2);color:var(--tx2)}
+.wrap{padding:24px 30px;max-width:1200px}
+.subtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.subtab{padding:7px 14px;border-radius:99px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--panel2);color:var(--tx2);cursor:pointer}
+.subtab.on{background:var(--acc);color:#1a1206;border-color:var(--acc)}
+.banner{background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.3);color:#bcd6f2;padding:11px 15px;border-radius:10px;font-size:12.5px;margin-bottom:20px;display:flex;gap:9px;align-items:flex-start}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px;margin-bottom:22px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 17px}
+.tile .k{color:var(--tx3);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.tile .v{font-size:23px;font-weight:750;margin-top:7px}.tile .d{font-size:11px;color:var(--tx2);margin-top:4px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:20px;overflow:hidden}
+.sec>h2{font-size:14px;font-weight:700;padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sec>h2 .hint{font-size:11px;color:var(--tx3);font-weight:500}
+.sec .body{padding:6px 8px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);font-weight:600;padding:9px 11px;border-bottom:1px solid var(--line)}
+td{padding:11px;border-bottom:1px solid var(--line);font-size:12.5px;vertical-align:top}
+tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.015)}
+.cli{font-weight:650}.note{color:var(--tx2);font-size:11.5px}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:650;white-space:nowrap}
+.b-lead{background:rgba(74,144,217,.15);color:var(--lead)}.b-qual{background:rgba(138,127,217,.16);color:var(--qual)}
+.b-prop{background:rgba(224,166,58,.15);color:var(--prop)}.b-mandato{background:rgba(201,161,90,.16);color:var(--acc2)}
+.b-fechado{background:rgba(63,178,127,.15);color:var(--fechado)}
+.b-ok{background:rgba(63,178,127,.15);color:var(--ok)}.b-warn{background:rgba(224,166,58,.15);color:var(--warn)}
+.b-bad{background:rgba(224,96,58,.16);color:var(--bad)}.b-gray{background:rgba(109,127,148,.18);color:var(--tx2)}
+.b-principal{background:rgba(201,161,90,.16);color:var(--acc2)}
+.mono{font-variant-numeric:tabular-nums}.right{text-align:right}
+.entrada{color:var(--ok)}.saida{color:var(--bad)}.previsto{color:var(--warn)}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:9px;padding:8px 13px;font-size:12.5px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--acc)}
+.funnel{display:flex;gap:9px;flex-wrap:wrap;padding:16px}
+.fn{flex:1;min-width:105px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:13px}
+.fn .c{font-size:22px;font-weight:750}.fn .l{font-size:11px;color:var(--tx2);margin-top:3px}
+.step{display:flex;align-items:center;gap:0;padding:16px;flex-wrap:wrap}
+.stepi{flex:1;min-width:90px;text-align:center;position:relative;padding:10px 6px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;margin-right:6px}
+.stepi .n{font-size:20px;font-weight:750}.stepi .s{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:9px}.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.metabar{padding:16px}.metabar .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.cascade{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;padding:16px}@media(max-width:820px){.cascade{grid-template-columns:1fr}}
+.lvl{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:15px}
+.lvl .t{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);font-weight:700}
+.lvl .goal{font-size:19px;font-weight:750;margin:7px 0 2px}.lvl .goal small{font-size:12px;color:var(--tx2)}.lvl .pct{font-size:11px;color:var(--tx2);margin-top:6px}
+.chk{padding:6px 18px 14px}.chk .row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}.chk .row:last-child{border-bottom:none}
+.chk .dot2{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:11px;font-weight:800}
+.chk .done{background:rgba(63,178,127,.16);color:var(--ok)}.chk .pend{background:rgba(224,166,58,.14);color:var(--warn);border:1px dashed rgba(224,166,58,.5)}
+.chk .done + .txt{color:var(--tx2);text-decoration:line-through}
+.agl{padding:6px 18px 12px}.agr{display:flex;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}.agr:last-child{border-bottom:none}
+.agh{font-weight:700;font-size:13px;color:var(--acc2);min-width:52px}.agt{font-weight:600;font-size:13px}.agm{font-size:11.5px;color:var(--tx2);margin-top:2px}
+.agtp{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--panel2);color:var(--tx2);border:1px solid var(--line)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px;padding:16px}
+.camp{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}.camp .nm{font-weight:650;font-size:13px}.camp .st{font-size:11px;color:var(--tx3);margin-top:2px}
+.camp .g{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.camp .kk{font-size:9.5px;text-transform:uppercase;color:var(--tx3);font-weight:600}.camp .vv{font-size:15px;font-weight:700;margin-top:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.kpi{background:var(--panel);padding:13px 15px}.kpi .kk{font-size:11px;color:var(--tx3);font-weight:600}.kpi .vv{font-size:17px;font-weight:700;margin-top:4px}.kpi .tg{font-size:10.5px;color:var(--tx3);margin-top:2px}
+.person{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}.person:last-child{border-bottom:none}
+.avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--panel2);color:var(--acc2)}
+.pn{font-size:13px;font-weight:700}.pc{font-size:11.5px;color:var(--tx2);margin-top:2px}
+.field{margin-top:10px}.field label{display:block;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:5px}
+.field input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--tx);font-size:13px}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.dash2{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}@media(max-width:900px){.dash2{grid-template-columns:1fr}}
+.arearow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;margin-bottom:22px}
+.areacard{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:15px;border-top:3px solid var(--line)}
+.areacard .an{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.areacard .av{font-size:20px;font-weight:750;margin-top:8px}.areacard .ad{font-size:11px;color:var(--tx2);margin-top:5px}
+.hide{display:none}
+</style></head><body>
+<div class="app">
+  <aside class="side">
+    <div class="brand" style="padding:16px 14px 14px;background:linear-gradient(155deg,#293172 0%,#1b2547 60%,#141c2b 100%);border-bottom:1px solid var(--line)"><div style="background:#fff;border-radius:10px;padding:11px 14px;display:flex;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)"><img src="data:image/png;base64,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" alt="Home Capital" style="width:100%;max-width:168px;height:auto;display:block"></div><div class="sub" style="color:#b9c6e0;margin-top:10px;text-align:center;letter-spacing:.2em">ERP · GESTÃO INTEGRADA</div></div>
+    <nav class="nav" id="nav">
+      <button data-t="dashboard" class="on"><span class="dot" style="background:var(--acc)"></span> Painel Executivo</button>
+      <div class="modlabel">Módulos</div>
+      <button data-t="comercial"><span class="dot" style="background:var(--comercial)"></span> Comercial</button>
+      <button data-t="operacional"><span class="dot" style="background:var(--operacional)"></span> Operacional · Crédito</button>
+      <button data-t="financeiro"><span class="dot" style="background:var(--financeiro)"></span> Financeiro</button>
+      <button data-t="juridico"><span class="dot" style="background:var(--juridico)"></span> Jurídico</button>
+      <button data-t="pessoas"><span class="dot" style="background:var(--rh)"></span> Pessoas · RH</button>
+      <div class="modlabel">Externo</div>
+      <button data-t="portal"><span class="dot" style="background:var(--acc2)"></span> Portal · Site</button>
+    </nav>
+    <div class="foot"><div id="footdate"></div><div style="margin-top:4px">home-capital-erp</div></div>
+  </aside>
+  <main class="main">
+    <header class="top"><h1><span class="mod" id="modcolor" style="background:var(--acc)"></span><span id="ttl">Painel Executivo</span></h1>
+      <div class="mode"><span id="saveInfo" style="font-size:10.5px;color:var(--tx3)"></span><button id="btnSalvar" onclick="salvarERP(false)" style="background:var(--acc);border:none;color:#fff;font-weight:700;font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer">💾 Salvar</button><button onclick="exportarBackup()" title="Baixar backup do estado" style="background:var(--panel2);border:1px solid var(--line);color:var(--tx);font-size:11.5px;padding:8px 10px;border-radius:8px;cursor:pointer">⤓ Backup</button><label title="Restaurar de um arquivo de backup" style="background:var(--panel2);border:1px solid var(--line);color:var(--tx);font-size:11.5px;padding:8px 10px;border-radius:8px;cursor:pointer">⤒ Restaurar<input type="file" accept=".json,application/json" onchange="importarBackup(this.files[0]);this.value=String()" style="display:none"></label><span class="pill q" id="qpill">—</span><span class="pill" id="modepill">—</span></div></header>
+
+    <!-- DASHBOARD EXECUTIVO -->
+    <section class="wrap tab" data-tab="dashboard">
+      <div class="stats" id="dash-kpis"></div>
+      <div class="sec"><h2>Meta anual R$ 920k <span class="hint">faturamento 2026</span></h2>
+        <div class="metabar"><div class="lab"><span id="dm-real"></span><span id="dm-pct"></span></div><div class="bar"><i id="dm-fill"></i></div></div></div>
+      <div class="sec"><h2>Situação por área <span class="hint">visão integrada das 5 áreas</span></h2><div style="padding:16px"><div class="arearow" id="dash-areas"></div></div></div>
+      <div class="dash2">
+        <div class="sec"><h2>Pipeline por estágio <span class="hint">fee ponderado</span></h2><div class="body" style="padding:16px"><div id="dash-bars"></div></div></div>
+        <div class="sec"><h2>Prioridades <span class="hint">maior fee em mandato</span></h2><div class="body"><table><tbody id="dash-prior"></tbody></table></div></div>
+      </div>
+    </section>
+
+    <!-- COMERCIAL -->
+    <section class="wrap tab hide" data-tab="comercial">
+      <div class="subtabs" id="st-com"><div class="subtab on" data-s="funil">Funil</div><div class="subtab" data-s="opp">Oportunidades</div><div class="subtab" data-s="agenda">Agenda</div><div class="subtab" data-s="mkt">Marketing</div></div>
+      <div id="com-agenda" class="hide"><div class="sec"><h2>Agenda comercial <span class="hint" id="agenda-sync"></span></h2><div style="padding:12px 16px 2px"><a class="btn" href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener" style="text-decoration:none">Abrir Google Agenda ↗</a> <a class="btn" href="https://meet.google.com" target="_blank" rel="noopener" style="text-decoration:none">Meet ↗</a></div><div class="body" id="agenda-list" style="padding:6px 16px 16px"></div></div></div>
+      <div id="com-funil">
+        <div class="stats" id="com-kpis"></div>
+        <div class="sec"><h2>Funil comercial <span class="hint" id="com-fcount"></span></h2><div class="funnel" id="com-funnel"></div></div>
+        <div class="sec"><h2>Operações em andamento <span class="hint" id="com-and-count"></span></h2><div class="body"><table><thead><tr><th>Cliente</th><th>Etapa</th><th class="right">Crédito</th><th class="right">Investimento</th><th class="right">Fee</th><th>Ação</th></tr></thead><tbody id="com-and-rows"></tbody></table></div></div>
+      </div>
+      <div id="com-opp" class="hide">
+        <div class="sec"><h2>Oportunidades (pré-mandato) <span class="hint"><button class="btn" onclick="exp('opp')">Exportar CSV</button></span></h2>
+          <div class="body"><table><thead><tr><th>Lead</th><th>Produto</th><th>Estágio</th><th class="right">Crédito</th><th class="right">Fee</th><th>Obs</th><th>Ação</th></tr></thead><tbody id="com-opp-rows"></tbody></table></div></div>
+      </div>
+      <div id="com-mkt" class="hide">
+        <div class="banner amber">⚠️ ERP é HTML estático — não publica no Meta sozinho. Aqui você <b>configura</b> a campanha conforme a política HCM e <b>importa o relatório</b> do Meta (CSV). A publicação final é 1 passo no Meta/Make.</div>
+        <div class="stats" id="mkt-stats"></div>
+        <div class="sec"><h2>Orçamento por pacote <span class="hint">política HCM · faixa × receita média 3m</span></h2><div class="body" style="padding:16px" id="mkt-budget"></div></div>
+        <div class="sec"><h2>Campanhas <span class="hint"><button class="btn" onclick="toggleCampForm()">+ Nova campanha</button> <button class="btn" onclick="document.getElementById('meta-file').click()">↑ Importar relatório Meta</button><input type="file" id="meta-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="importMeta(this.files[0])"></span></h2>
+          <div id="camp-form" class="hide" style="padding:16px;border-bottom:1px solid var(--line)"></div>
+          <div id="meta-msg" style="font-size:11px;color:var(--tx2);padding:8px 16px 0"></div>
+          <div class="cards" id="camps"></div></div>
+        <div class="sec"><h2>KPIs de Marketing <span class="hint">metas do plano</span></h2><div class="kpis" id="mkt-kpis"></div></div>
+        <div class="sec"><h2>Checklist antes de publicar <span class="hint">regra da casa</span></h2><div class="chk" id="mkt-check"></div></div>
+      </div>
+    </section>
+
+    <!-- OPERACIONAL -->
+    <section class="wrap tab hide" data-tab="operacional">
+      <div class="subtabs" id="st-op"><div class="subtab on" data-s="esteira">Esteira de crédito</div><div class="subtab" data-s="ops">Operações em mandato</div></div>
+      <div id="op-esteira">
+        <div class="sec"><h2>Esteira de crédito <span class="hint">workflow de aprovação</span></h2><div class="step" id="op-step"></div></div>
+        <div class="stats" id="op-kpis"></div>
+      </div>
+      <div id="op-ops" class="hide">
+        <div class="sec"><h2>Operações em mandato/fechado <span class="hint"><button class="btn" onclick="exp('ops')">Exportar CSV</button></span></h2>
+          <div class="body"><table><thead><tr><th>Operação</th><th>Produto</th><th>Estágio</th><th class="right">Crédito</th><th class="right">Fee</th><th>Obs</th></tr></thead><tbody id="op-ops-rows"></tbody></table></div></div>
+      </div>
+    </section>
+
+    <!-- FINANCEIRO -->
+    <section class="wrap tab hide" data-tab="financeiro">
+      <div class="banner">ℹ️ Conta operacional única: <b>C6 · AC Consult</b> (CNPJ 51.420.595/0001-75) — paga todos os custos. Conciliado ao extrato de 21/07/2026.</div>
+      <div class="subtabs" id="st-fin"><div class="subtab on" data-s="conc">Conciliação</div><div class="subtab" data-s="mov">Movimentação</div><div class="subtab" data-s="cus">Custos</div><div class="subtab" data-s="pf">Tiago (PF)</div></div>
+      <div id="fin-conc">
+        <div class="stats" id="fin-stats"></div>
+        <div class="sec"><h2>Margem &amp; Valuation <span class="hint">estimativa gerencial · base jan–jul/26 anualizada</span></h2><div class="body" style="padding:16px"><div class="stats" id="fin-val"></div><div id="fin-val-note" style="font-size:11px;color:var(--tx3);margin-top:12px;line-height:1.6"></div></div></div>
+        <div class="sec"><h2>Conciliação bancária → Caixa para campanhas</h2><div class="body" style="padding:16px">
+          <div class="stats" style="margin-bottom:14px">
+            <div class="tile"><div class="k">Saldo em conta</div><div class="v mono" id="con-saldo">R$0</div><div class="d">soma das contas</div></div>
+            <div class="tile"><div class="k">Caixa livre</div><div class="v mono" id="con-livre" style="color:var(--ok)">R$0</div><div class="d">saldo − custos do mês</div></div>
+            <div class="tile"><div class="k">Teto 12% (mkt)</div><div class="v mono" id="con-teto" style="color:var(--warn)">R$0</div><div class="d">política de marketing</div></div>
+            <div class="tile"><div class="k">Verba p/ campanhas</div><div class="v mono" id="con-verba" style="color:var(--info)">R$0</div><div class="d">menor entre caixa e teto</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <button class="btn" onclick="document.getElementById('conc-file').click()">↑ Importar conciliação bancária (CSV, Excel, OFX, PDF)</button>
+            <input type="file" id="conc-file" accept=".csv,.xlsx,.xls,.txt,.ofx,.pdf" style="display:none" onchange="importConc(this.files[0])">
+            <span id="conc-import-msg" style="font-size:11.5px;color:var(--tx2)"></span></div>
+          <div style="font-size:10.5px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Saldos das contas — edite</div>
+          <div id="contas-lista"></div>
+          <button class="btn" style="margin-top:10px" onclick="addConta()">+ Adicionar conta</button>
+          <div class="divider"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field" style="margin-top:0"><label>Custos comprometidos do mês (R$)</label><input type="number" id="con-custos" value="22942" oninput="renderCon()"></div>
+            <div class="field" style="margin-top:0"><label>Receita conciliada do mês (R$)</label><input type="number" id="con-receita" value="57224" oninput="renderCon()"></div></div>
+          <div class="field"><label>% do caixa livre para campanhas</label><input type="number" id="con-pct" value="15" oninput="renderCon()"></div>
+          <div id="con-nota" style="font-size:11.5px;color:var(--tx2);margin-top:8px"></div>
+        </div></div>
+      </div>
+      <div id="fin-mov" class="hide"><div class="stats" id="fat-stats"></div><div class="sec"><h2>Faturamento 2026 — receita operacional <span class="hint">extrato AC Consult (entradas − resgates CDB/internos)</span></h2><div class="body"><table><tbody id="fat-rows"></tbody></table></div></div><div class="sec"><h2>Movimentação bancária conciliada — 2026 <span class="hint"><button class="btn" onclick="exp('mov')">Exportar CSV</button></span></h2><div class="body"><table><tbody id="mov-rows"></tbody></table></div></div></div>
+      <div id="fin-cus" class="hide"><div class="sec"><h2>Custos fixos mensais <span class="hint">estrutura recorrente</span></h2><div class="body"><table><tbody id="cus-rows"></tbody></table></div></div>
+        <div class="sec"><h2>Entradas previstas — 2º semestre</h2><div class="body"><table><tbody id="ent-rows"></tbody></table></div></div></div>
+      <div id="fin-pf" class="hide"><div class="sec"><h2>Tiago — fluxo PF 2026 (via AC Consult) <span class="hint" id="pf-tot"></span></h2>
+        <div class="subtabs" id="pf-meses" style="padding:12px 16px 0"></div><div class="body" id="pf-detalhe" style="padding:8px 12px"></div></div></div>
+    </section>
+
+    <!-- JURIDICO -->
+    <section class="wrap tab hide" data-tab="juridico">
+      <div class="stats" id="jur-kpis"></div>
+      <div class="sec"><h2>Ciclo dos mandatos <span class="hint">workflow: rascunho → assinado → vigente → vencido</span></h2><div class="step" id="jur-step"></div></div>
+      <div class="sec"><h2>Mandatos de crédito corporativo <span class="hint"><button class="btn" onclick="exp('mand')">Exportar CSV</button></span></h2>
+        <div class="body"><table><thead><tr><th>Cliente</th><th>Assinado</th><th>Vencimento</th><th>Status</th><th>Observação</th></tr></thead><tbody id="jur-rows"></tbody></table></div></div>
+    </section>
+
+    <!-- PESSOAS / RH -->
+    <section class="wrap tab hide" data-tab="pessoas">
+      <div class="subtabs" id="st-rh"><div class="subtab on" data-s="eq">Equipe</div><div class="subtab" data-s="forn">Fornecedores / Credores</div><div class="subtab" data-s="brk">Brokers / Parceiros</div></div>
+      <div class="stats" id="rh-kpis"></div>
+      <div id="rh-eq"><div class="sec"><h2>Time Home Capital</h2><div id="equipe"></div></div></div>
+      <div id="rh-forn" class="hide"><div class="sec"><h2>Fornecedores HCM (Home Equity)</h2><div id="fornecedores"></div></div></div>
+      <div id="rh-brk" class="hide"><div class="sec"><h2>Brokers & Parceiros <span class="hint"><button class="btn" onclick="exp('parc')">Exportar CSV</button></span></h2><div id="parceiros"></div></div></div>
+    </section>
+      <!-- PORTAL / SITE / ORIGINAÇÃO -->
+    <section class="wrap tab hide" data-tab="portal">
+      <div class="subtabs" id="st-portal"><div class="subtab on" data-s="orig">Originação · Brokers</div><div class="subtab" data-s="site">Site institucional</div></div>
+      <div id="portal-orig">
+        <div class="banner amber">Fluxo: o broker abre o <b>Portal de Originação da Home Capital</b>, preenche os dados e sobe os documentos. O retorno da análise vem por e-mail (até 2 dias úteis) e a operação entra no <b>pipeline/funil</b>. A entrada no ERP é manual (ou pela tarefa agendada que lê o retorno) — integração 100% automática exige back-end.</div>
+        <div class="stats">
+          <a class="tile" href="Portal Originacao Home Capital.html" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit;cursor:pointer">
+            <div class="k">Portal Home Capital</div><div class="v" style="font-size:15px">Abrir / preencher ↗</div><div class="d">com a cara da HC</div></a>
+          <div class="tile" style="cursor:pointer;position:relative;overflow:hidden"><div class="k">Importar operação</div><div class="v" style="font-size:13px;color:var(--acc2)">📥 Escolher .json</div><div class="d">do portal → funil (Pré-análise)</div><input type="file" accept=".json,application/json" onchange="importOpPortal(this.files[0]);this.value='';" style="position:absolute;inset:0;opacity:0;cursor:pointer"></div>
+          <div class="tile"><div class="k">Retorno da análise</div><div class="v" style="font-size:15px">≤ 2 dias úteis</div><div class="d">por e-mail → pipeline</div></div>
+          <div class="tile"><div class="k">Destino no ERP</div><div class="v" style="font-size:15px">Funil · Pré-análise</div><div class="d">nova operação</div></div>
+        </div>
+        <div class="sec"><h2>Portal de Originação — Brokers <span class="hint">Portal Home Capital · abra em nova aba se não carregar</span></h2>
+          <div class="body" style="padding:0"><iframe src="Portal Originacao Home Capital.html" style="width:100%;height:70vh;border:0;border-radius:0 0 12px 12px;background:#fff" loading="lazy" referrerpolicy="no-referrer"></iframe></div></div>
+      </div>
+      <div id="portal-site" class="hide">
+        <div class="stats">
+          <a class="tile" href="https://homecapital.net.br" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit;cursor:pointer">
+            <div class="k">Site institucional</div><div class="v" style="font-size:15px">homecapital.net.br ↗</div><div class="d">abrir em nova aba</div></a>
+          <a class="tile" href="https://wa.me/5511983870015" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit;cursor:pointer">
+            <div class="k">WhatsApp comercial</div><div class="v" style="font-size:15px">(11) 98387-0015 ↗</div><div class="d">wa.me</div></a>
+          <a class="tile" href="mailto:contato@homecapital.net.br" style="display:block;text-decoration:none;color:inherit;cursor:pointer">
+            <div class="k">Contato</div><div class="v" style="font-size:13.5px">contato@homecapital.net.br</div><div class="d">e-mail</div></a>
+          <a class="tile" href="tel:+551147700265" style="display:block;text-decoration:none;color:inherit;cursor:pointer">
+            <div class="k">Telefone</div><div class="v" style="font-size:15px">(11) 4770-0265</div><div class="d">São Paulo · SP</div></a>
+        </div>
+        <div class="sec"><h2>Site Home Capital <span class="hint">homecapital.net.br — se não carregar, o site bloqueia iframe; use o botão acima</span></h2>
+          <div class="body" style="padding:0"><iframe src="https://homecapital.net.br" style="width:100%;height:66vh;border:0;border-radius:0 0 12px 12px;background:#fff" loading="lazy" referrerpolicy="no-referrer"></iframe></div></div>
+      </div>
+    </section>
+</main>
+</div>
+<script>
+const PIPELINE=[{"n":"JULIO FAO","p":"Crédito","e":"mandato","c":20000000,"f":1430000,"inv":0,"o":"Jurídico/Contrato · FAO Building (mestre)","st4":"jur","a":1,"m":1},{"n": "PPA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Lead"}, {"n": "MENIN", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Lead"}, {"n": "HOMERO", "p": "Investimento", "e": "qual", "c": 0, "f": 850, "inv": 3400000, "o": "Pré-análise"}, {"n": "RODRIGO GOIAS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "Milton Leite", "p": "A classificar", "e": "prop", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise", "st4": "cred", "a": 1}, {"n": "THAYSA INDAIATUBA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "FELIPE SORRIDENTS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "RAFAEL LUSTRI", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "DENIS BELENZINHO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "MARIANA SORRIDENTS P", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "MAX GIOLASE", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "DRA DENISE", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "MARIANA SORRIDENTS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "Gustavo Ambev", "p": "Investimento", "e": "qual", "c": 0, "f": 75, "inv": 300000, "o": "Pré-análise"}, {"n": "DR FABIO OFTALMO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "HUGO VISIVEL", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "DRA GISELE RJ", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "THIAGO GOIANIA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "DR ROBERTO PELOTAS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "Dr ALEXANDRE CORUMBA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "DIEGO ABC", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "WALMOR", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "MONICA NAVEGANTES", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "Marcos AMA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "PAULAMELIA PATOS DE MINAS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "BRUNO SANTOS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "RODRIGO PELOTAS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "JOSUE", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "GUSTAVO OSASCO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "SAULO BRASILIA", "p": "Investimento", "e": "qual", "c": 0, "f": 100, "inv": 400000, "o": "Pré-análise"}, {"n": "Valter", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Análise de crédito"}, {"n": "FLAVIO MULLER", "p": "Investimento", "e": "qual", "c": 0, "f": 75, "inv": 300000, "o": "Pré-análise"}, {"n": "TATIANA DIEGO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "JULIANA ITAMAR", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "ANGELA SALUS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "VINICIUS SALUS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "MARCOS ANA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "JENIFER IND RAUL", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "LILYON IND RAUL", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "ROBERTO IND DANIEL", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "ELITON IND DANIEL RIO BRANCO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "GICELE IND DANIEL BELEM", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "MOYSES", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "TERRINHA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "Dr MOSANIEL  PARA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "ROGERIO PIT", "p": "Crédito", "e": "qual", "c": 900000, "f": 49500, "inv": 0, "o": "Pré-análise"}, {"n": "PAULO FINANCIAMENTO", "p": "Crédito", "e": "qual", "c": 20000000, "f": 300000, "inv": 0, "o": "Pré-análise"}, {"n": "ITAMAR", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "LEONARDO CANBURIU", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "PAULAMELIA", "p": "Crédito", "e": "qual", "c": 200000, "f": 11125, "inv": 500000, "o": "Pré-análise"}, {"n": "RENATA CASEMIRO LUCAS", "p": "Crédito", "e": "qual", "c": 300000, "f": 16500, "inv": 0, "o": "Pré-análise"}, {"n": "FELIPE IND SAMIRA", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "RODRIGO GOIANIA", "p": "Crédito", "e": "qual", "c": 1300000, "f": 71500, "inv": 0, "o": "Pré-análise"}, {"n": "ALBERTO MAGNI", "p": "Crédito", "e": "qual", "c": 500000, "f": 27500, "inv": 0, "o": "Pré-análise"}, {"n": "ROBERTO BINI", "p": "Crédito", "e": "qual", "c": 1250000, "f": 68750, "inv": 0, "o": "Pré-análise"}, {"n": "REGINALDO DIEGO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "SANDRA PIT", "p": "Crédito", "e": "qual", "c": 1500000, "f": 82500, "inv": 0, "o": "Pré-análise"}, {"n": "VINICIUS LENCOIS", "p": "Crédito", "e": "qual", "c": 5000000, "f": 75000, "inv": 0, "o": "Pré-análise"}, {"n": "RICARDO LENCOIS", "p": "Crédito", "e": "qual", "c": 4000000, "f": 60000, "inv": 0, "o": "Pré-análise"}, {"n": "DR MARCELO CURITIBA", "p": "Investimento", "e": "qual", "c": 0, "f": 625, "inv": 2500000, "o": "Pré-análise"}, {"n": "LUCIANO GOIAS", "p": "Crédito", "e": "qual", "c": 500000, "f": 27500, "inv": 0, "o": "Pré-análise"}, {"n": "EDUARDO RAFA", "p": "Crédito", "e": "qual", "c": 15000000, "f": 225000, "inv": 0, "o": "Pré-análise"}, {"n": "BRUNO IND DANIEL", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "JUCEMARA", "p": "Crédito", "e": "qual", "c": 700000, "f": 38500, "inv": 0, "o": "Pré-análise"}, {"n": "SUNCLICK", "p": "Crédito", "e": "qual", "c": 22000000, "f": 330000, "inv": 0, "o": "Pré-análise"}, {"n": "FLAVIO VILLA RICA", "p": "Crédito", "e": "qual", "c": 5000000, "f": 75000, "inv": 0, "o": "Pré-análise"}, {"n": "CHARLES BRASILIA", "p": "Crédito", "e": "qual", "c": 7500000, "f": 112500, "inv": 0, "o": "Pré-análise"}, {"n": "CHARLES TO", "p": "Crédito", "e": "qual", "c": 500000, "f": 27500, "inv": 0, "o": "Pré-análise"}, {"n": "RICARDO", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "RAMOS", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "VINICIUS", "p": "Crédito", "e": "qual", "c": 400000, "f": 22000, "inv": 0, "o": "Pré-análise"}, {"n": "JHONE", "p": "Crédito", "e": "qual", "c": 2500000, "f": 137500, "inv": 0, "o": "Pré-análise"}, {"n": "EIRILAR", "p": "Crédito", "e": "qual", "c": 30000000, "f": 450000, "inv": 0, "o": "Pré-análise", "m": 1}, {"n": "MVBC", "p": "Crédito", "e": "qual", "c": 1914000, "f": 105270, "inv": 0, "o": "Pré-análise"}, {"n": "OXXO", "p": "Crédito", "e": "mandato", "c": 600000, "f": 33000, "inv": 0, "o": "Pré-análise", "st4": "jur", "a": 1, "m": 1}, {"n": "DINHO MOGI", "p": "Crédito", "e": "mandato", "c": 1500000, "f": 82500, "inv": 0, "o": "Pré-análise", "st4": "jur", "a": 1}, {"n": "GERSON ALPHAVILLE", "p": "Crédito", "e": "qual", "c": 2000000, "f": 110000, "inv": 0, "o": "Pré-análise", "m": 1}, {"n": "JCN", "p": "Crédito", "e": "qual", "c": 100000000, "f": 1500000, "inv": 0, "o": "Pré-análise"}, {"n": "CONCRESUL", "p": "Crédito", "e": "qual", "c": 1800000, "f": 99000, "inv": 0, "o": "Pré-análise", "m": 1}, {"n": "RICARDO HENRIQUE", "p": "Crédito", "e": "fechado", "c": 1900000, "f": 104500, "inv": 0, "o": "Pré-análise", "st4": "fat", "a": 1}, {"n": "SOLVEi GARCA", "p": "Crédito", "e": "mandato", "c": 12000000, "f": 180000, "inv": 0, "o": "Pré-análise", "st4": "jur", "a": 1, "m": 1}, {"n": "SOLVEi MACAS", "p": "Crédito", "e": "mandato", "c": 2000000, "f": 110000, "inv": 0, "o": "Pré-análise", "st4": "jur", "a": 1, "m": 1}, {"n": "DIEGO RAFA", "p": "Crédito", "e": "prop", "c": 3000000, "f": 165000, "inv": 0, "o": "Pré-análise", "st4": "cred", "a": 1}, {"n": "BRUNO  BATTAGLINI", "p": "Crédito", "e": "qual", "c": 5000000, "f": 75000, "inv": 0, "o": "Pré-análise"}, {"n": "ALLPFIT", "p": "Crédito", "e": "prop", "c": 15000000, "f": 225000, "inv": 0, "o": "Pré-análise", "st4": "cred", "a": 1}, {"n": "WALL STRET", "p": "Crédito", "e": "prop", "c": 15000000, "f": 225000, "inv": 0, "o": "Pré-análise", "st4": "cred", "a": 1}, {"n": "CENTRAL PARK JURERE", "p": "Investimento", "e": "qual", "c": 0, "f": 1250, "inv": 5000000, "o": "Pré-análise"}, {"n": "CLAUDIO RENOGRID", "p": "A classificar", "e": "qual", "c": 0, "f": 0, "inv": 0, "o": "Pré-análise"}, {"n": "VICTOR TUPI ST ANDRE", "p": "Investimento", "e": "prop", "c": 0, "f": 750, "inv": 3000000, "o": "Pré-análise", "st4": "cred", "a": 1}, {"n": "TERRAS DE GAIA", "p": "Crédito", "e": "fechado", "c": 2500000, "f": 137500, "inv": 0, "o": "Pré-análise", "st4": "fat", "a": 1, "m": 1}, {"n": "JULIO VERDE SUMARE", "p": "Crédito", "e": "qual", "c": 10000000, "f": 150000, "inv": 0, "o": "Pré-análise"}, {"n": "EDSON SINOP", "p": "Crédito", "e": "qual", "c": 3500000, "f": 52500, "inv": 0, "o": "Pré-análise"}, {"n": "GRUPO PASINATO", "p": "Crédito", "e": "prop", "c": 25000000, "f": 375000, "inv": 0, "o": "Pré-análise", "st4": "cred", "a": 1}, {"n": "PRISCILA MAR PITI", "p": "Crédito", "e": "qual", "c": 2500000, "f": 138475, "inv": 3900000, "o": "Pré-análise"}, {"n": "JETFRIO", "p": "Crédito", "e": "qual", "c": 8000000, "f": 120000, "inv": 0, "o": "Pré-análise", "m": 1}, {"n": "ALEX SMART VENTURE", "p": "Crédito", "e": "prop", "c": 15000000, "f": 225000, "inv": 0, "o": "Pré-análise", "st4": "cred", "a": 1, "m": 1}, {"n": "FELIPE SANTO ANDRE", "p": "Crédito", "e": "mandato", "c": 3000000, "f": 165000, "inv": 0, "o": "Pré-análise", "st4": "jur", "a": 1}, {"n": "DAYSE SHIMIZU", "p": "Crédito", "e": "fechado", "c": 10000000, "f": 159750, "inv": 39000000, "o": "Pré-análise", "st4": "fat", "a": 1}, {"n": "JOSCELIN BOULEVARD", "p": "Crédito", "e": "mandato", "c": 4000000, "f": 60000, "inv": 0, "o": "Pré-análise", "st4": "jur", "a": 1, "m": 1}, {"n": "HARAS LARISSA", "p": "Crédito", "e": "qual", "c": 6000000, "f": 90000, "inv": 0, "o": "Pré-análise"}];
+const MOV=[
+ {m:"Janeiro",e:26850.82,s:31065.93},
+ {m:"Fevereiro",e:41650.31,s:52800.91},
+ {m:"Março",e:175473.86,s:94242.54},
+ {m:"Abril",e:34490.48,s:116486.34},
+ {m:"Maio",e:59996.57,s:60432.31},
+ {m:"Junho",e:125889.30,s:122669.21},
+ {m:"Julho (até 21)",e:55897.97,s:44096.16}
+]; const SALDO_CONC=15062.83;
+const CUSTOS=[
+ {n:"Pró-labore",v:20000,st:"mensal"},{n:"Escritório",v:850,st:"mensal"},
+ {n:"Contabilidade HC",v:247,st:"mensal"},{n:"Contabilidade AC",v:199,st:"mensal"},
+ {n:"Telefonia",v:56,st:"mensal"},{n:"Microsoft 365",v:33,st:"mensal"},
+ {n:"Site (manutenção)",v:57,st:"mensal"},{n:"Tributos/parcelamento (média)",v:1500,st:"mensal"}
+]; const ENTRADAS=[
+ {n:"FAO Building — fee sucesso (3,5% cash)",v:"~R$1,9MM"},{n:"Mandatos incorporação (Boulevard + Ubatuba)",v:"~R$80k"},
+ {n:"Home Equity via parceiros (3–4 ops)",v:"~R$90k"},{n:"Advisory Patrimonial (retainer 3 × 6m)",v:"~R$54k"}
+];
+const FIN_PF={"Jan/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3744, "pago": true}, {"desc": "Financiamento (Safra)", "val": 2194, "pago": true}, {"desc": "Cartão C6", "val": 1668, "pago": true}, {"desc": "Retirada Tiago", "val": 1600, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 877, "pago": true}, {"desc": "Saúde (Amil)", "val": 539, "pago": true}, {"desc": "Cartão CSF", "val": 226, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 220, "pago": true}, {"desc": "Gás (Comgás)", "val": 41, "pago": true}], "Fev/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3815, "pago": true}, {"desc": "Financiamento (Safra)", "val": 2194, "pago": true}, {"desc": "Cartão C6", "val": 2540, "pago": true}, {"desc": "Retirada Tiago", "val": 1771, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 877, "pago": true}, {"desc": "Saúde (Amil)", "val": 538, "pago": true}, {"desc": "Cartão CSF", "val": 857, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 220, "pago": true}, {"desc": "Gás (Comgás)", "val": 80, "pago": true}], "Mar/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3925, "pago": true}, {"desc": "Cartão C6", "val": 1428, "pago": true}, {"desc": "Retirada Tiago", "val": 1321, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 895, "pago": true}, {"desc": "Saúde (Amil)", "val": 528, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 220, "pago": true}, {"desc": "Gás (Comgás)", "val": 63, "pago": true}], "Abr/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 4100, "pago": true}, {"desc": "Financiamento (Safra)", "val": 2194, "pago": true}, {"desc": "Cartão C6", "val": 2120, "pago": true}, {"desc": "Retirada Tiago", "val": 1850, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 877, "pago": true}, {"desc": "Saúde (Amil)", "val": 528, "pago": true}, {"desc": "Cartão CSF", "val": 261, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 440, "pago": true}, {"desc": "Gás (Comgás)", "val": 58, "pago": true}], "Mai/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3926, "pago": true}, {"desc": "Financiamento (Safra)", "val": 4547, "pago": true}, {"desc": "Cartão C6", "val": 699, "pago": true}, {"desc": "Retirada Tiago", "val": 322, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 877, "pago": true}, {"desc": "Saúde (Amil)", "val": 528, "pago": true}, {"desc": "Cartão CSF", "val": 309, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 220, "pago": true}, {"desc": "Gás (Comgás)", "val": 58, "pago": true}], "Jun/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 4006, "pago": true}, {"desc": "Cartão C6", "val": 417, "pago": true}, {"desc": "Retirada Tiago", "val": 1832, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 877, "pago": true}, {"desc": "Saúde (Amil)", "val": 621, "pago": true}, {"desc": "Cartão CSF", "val": 604, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 220, "pago": true}, {"desc": "Gás (Comgás)", "val": 91, "pago": true}], "Jul/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3956, "pago": true}, {"desc": "Financiamento (Safra)", "val": 2194, "pago": true}, {"desc": "Cartão C6", "val": 2802, "pago": true}, {"desc": "Retirada Tiago", "val": 550, "pago": true}, {"desc": "Saúde (Prevent Senior)", "val": 967, "pago": true}, {"desc": "Saúde (Amil)", "val": 634, "pago": true}, {"desc": "Cartão CSF", "val": 130, "pago": true}, {"desc": "Doméstica (Josefa)", "val": 220, "pago": true}], "Ago/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3925, "pago": false}, {"desc": "Financiamento (Safra)", "val": 2664, "pago": false}, {"desc": "Cartão C6", "val": 1668, "pago": false}, {"desc": "Retirada Tiago", "val": 1321, "pago": false}, {"desc": "Saúde (Prevent Senior)", "val": 892, "pago": false}, {"desc": "Saúde (Amil)", "val": 559, "pago": false}, {"desc": "Cartão CSF", "val": 398, "pago": false}, {"desc": "Doméstica (Josefa)", "val": 251, "pago": false}, {"desc": "Gás (Comgás)", "val": 65, "pago": false}], "Set/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3925, "pago": false}, {"desc": "Financiamento (Safra)", "val": 2664, "pago": false}, {"desc": "Cartão C6", "val": 1668, "pago": false}, {"desc": "Retirada Tiago", "val": 1321, "pago": false}, {"desc": "Saúde (Prevent Senior)", "val": 892, "pago": false}, {"desc": "Saúde (Amil)", "val": 559, "pago": false}, {"desc": "Cartão CSF", "val": 398, "pago": false}, {"desc": "Doméstica (Josefa)", "val": 251, "pago": false}, {"desc": "Gás (Comgás)", "val": 65, "pago": false}], "Out/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3925, "pago": false}, {"desc": "Financiamento (Safra)", "val": 2664, "pago": false}, {"desc": "Cartão C6", "val": 1668, "pago": false}, {"desc": "Retirada Tiago", "val": 1321, "pago": false}, {"desc": "Saúde (Prevent Senior)", "val": 892, "pago": false}, {"desc": "Saúde (Amil)", "val": 559, "pago": false}, {"desc": "Cartão CSF", "val": 398, "pago": false}, {"desc": "Doméstica (Josefa)", "val": 251, "pago": false}, {"desc": "Gás (Comgás)", "val": 65, "pago": false}], "Nov/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3925, "pago": false}, {"desc": "Financiamento (Safra)", "val": 2664, "pago": false}, {"desc": "Cartão C6", "val": 1668, "pago": false}, {"desc": "Retirada Tiago", "val": 1321, "pago": false}, {"desc": "Saúde (Prevent Senior)", "val": 892, "pago": false}, {"desc": "Saúde (Amil)", "val": 559, "pago": false}, {"desc": "Cartão CSF", "val": 398, "pago": false}, {"desc": "Doméstica (Josefa)", "val": 251, "pago": false}, {"desc": "Gás (Comgás)", "val": 65, "pago": false}], "Dez/26": [{"desc": "Aluguel (V.F. Imóveis)", "val": 3925, "pago": false}, {"desc": "Financiamento (Safra)", "val": 2664, "pago": false}, {"desc": "Cartão C6", "val": 1668, "pago": false}, {"desc": "Retirada Tiago", "val": 1321, "pago": false}, {"desc": "Saúde (Prevent Senior)", "val": 892, "pago": false}, {"desc": "Saúde (Amil)", "val": 559, "pago": false}, {"desc": "Cartão CSF", "val": 398, "pago": false}, {"desc": "Doméstica (Josefa)", "val": 251, "pago": false}, {"desc": "Gás (Comgás)", "val": 65, "pago": false}]}; const FIN_ORDEM=["Jan/26", "Fev/26", "Mar/26", "Abr/26", "Mai/26", "Jun/26", "Jul/26", "Ago/26", "Set/26", "Out/26", "Nov/26", "Dez/26"];
+const EQUIPE=[{nm:"Tiago Cavalcante da Silva",cargo:"Fundador & Sócio · Crédito & Advisory",ini:"T",tag:"Ativo"}]; const FORNECEDORES=[
+ {nm:"Galleria Bank",d:"Principal fornecedor · Produto HCM",ini:"GB",tag:"Principal"},
+ {nm:"Banco Inter",d:"Filipe · 1,19% a.m. · LTV 50%",ini:"BI",tag:"Ativo"},
+ {nm:"CashMe",d:"Home Equity · Parceiro HCM",ini:"CM",tag:"Ativo"},
+ {nm:"Creditas",d:"Home Equity · Parceiro HCM",ini:"CR",tag:"Ativo"},
+ {nm:"Pontte",d:"Home Equity · Parceiro HCM",ini:"PT",tag:"Ativo"},
+ {nm:"Direto",d:"Home Equity · Parceiro HCM",ini:"DR",tag:"Ativo"}
+]; const PARCEIROS=[
+ {"nm":"Júlio Verde","d":"Broker · FAO Building / originação","ini":"JV"},
+ {"nm":"Sarkis Nabi Curi Jr","d":"Broker · contrato assinado · Gericada CEF","ini":"S"},
+ {"nm":"Bonini","d":"Broker · Indústria de Alumínio","ini":"B"},
+ {"nm":"Aline","d":"Parceira · Porto Alegre / RS","ini":"AL"},
+ {"nm":"Felipe","d":"Parceiro · Curitiba / PR","ini":"F"},
+ {"nm":"André Lucas","d":"Sócio 88% · Tríade Capital AI","ini":"AN"}
+];
+const CAMPANHAS=[
+ {nm:'Capital Ponte · Piloto 14d · HCM',status:'No ar SEM anúncio — publicar criativo',verba:0,leads:0,cpl:0,brief:'Objetivo: Cadastros (Leads) ✓ (o único configurado certo). Orçamento R$23/dia. Mas está com "Nenhum anúncio" ativo → 0 leads. AÇÃO: anexar criativo + formulário instantâneo com a pergunta de garantia do Capital Ponte. Fonte: Meta Ads, últimos 30d (27/jun–26/jul/26).'},
+ {nm:'Post IG · "Seu contrato Built to Suit já…"',status:'Encerrada · engajamento',verba:51,leads:0,cpl:0,brief:'204 visitas ao perfil @ R$0,25 — objetivo engajamento, não gera lead. Orçamento R$52.'},
+ {nm:'Post IG · "Incorporador, tire o peso do…"',status:'Encerrada · mensagens',verba:74,leads:0,cpl:0,brief:'3 conversas por mensagem @ R$24,77 — objetivo mensagens, não gera lead qualificado. Orçamento R$78.'},
+ {nm:'Post IG · "Incorporador, tire o peso do…" (2)',status:'Encerrada · mensagens',verba:0,leads:0,cpl:0,brief:'Objetivo mensagens · sem resultado apurado. Orçamento R$78.'},
+ {nm:'Instagram Post',status:'Encerrada · mensagens',verba:0,leads:0,cpl:0,brief:'Objetivo mensagens · sem resultado apurado. Orçamento R$66.'}
+]; /* Snapshot Meta 30d (27/jun–26/jul/26), conta 1594244754741722 — 5 de 15 campanhas visíveis; coluna Valor gasto cortada, gasto reconstruído por resultados×custo. */ const MKT_KPIS=[
+ {k:"Leads c/ garantia desimpedida",v:"—",tg:"meta ≥ 50%"},{k:"Lead → proposta",v:"—",tg:"meta ≥ 30%"},
+ {k:"Conversão 2º produto",v:"—",tg:"meta ≥ 20%"},{k:"Marketing / receita",v:"12%",tg:"meta ≤ 12%"},
+ {k:"Brokers ativos",v:"6",tg:"meta 5–8"}
+]; const MKT={orcamento:18000, receita:150000};
+const META={alvo:920000, realizado:400569}; const FAT={"Jan/26": 19714, "Fev/26": 31463, "Mar/26": 157620, "Abr/26": 16990, "Mai/26": 28996, "Jun/26": 110889, "Jul/26": 34897}; const MANDATOS=[{"cli":"FAO Building Engenharia LTDA","assinado":"Sim","venc":"21/06/2029","status":"VÁLIDO","obs":"Clicksign 4/4 assinaturas (finalizado 22/06/2026)."},{"cli":"G R Modas EIRELI (Gerson Alphaville)","assinado":"Sim","venc":"","status":"VÁLIDO","obs":"Clicksign 4/4. Minuta simplificada sem cláusula de vigência — válido, sem vencimento calculável."},{"cli":"SPE Terras de Gaia Empreendimentos LTDA","assinado":"Sim","venc":"04/03/2028","status":"VÁLIDO","obs":"Clicksign 5/5 assinaturas."},{"cli":"Jetfrio Refrigeração LTDA","assinado":"Sim","venc":"20/03/2026","status":"VENCIDO","obs":"Clicksign 4/4. Prazo 540d — vencido."},{"cli":"Marcus Vinícius J. de Toledo (Origem)","assinado":"Sim","venc":"29/04/2025","status":"VENCIDO","obs":"Assinado via Clicksign (não consta no último relatório). Prazo 365d — vencido."},{"cli":"Atual - Diagnóstico por Imagem (Home Curitiba)","assinado":"Não","venc":"","status":"NÃO ASSINADO","obs":"Sem evidência de assinatura em nenhuma fonte."},{"cli":"Boulevard Botânico Incorporadora SPE LTDA","assinado":"Sim","venc":"20/05/2029","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 21/05/2026). Estava como NÃO ASSINADO."},{"cli":"Brasifrio Equipamentos LTDA","assinado":"Não","venc":"","status":"NÃO ASSINADO","obs":"Enviado recentemente (base 08/07/2026), sem assinatura ainda."},{"cli":"Cereais Basso LTDA (Grupo Basso)","assinado":"Sim","venc":"20/01/2026","status":"VENCIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 24/07/2025). Prazo 180d — vencido."},{"cli":"Clóvis Ferreira de Araújo","assinado":"Não","venc":"","status":"NÃO ASSINADO","obs":"Rascunho sem data e sem assinatura."},{"cli":"Concresul Engenharia e Construções LTDA","assinado":"Sim","venc":"22/01/2028","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 22/01/2025). Estava como NÃO ASSINADO."},{"cli":"Duque Patrimonial / Tony (Rafael Salvador)","assinado":"Sim","venc":"","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (Duque Patrimonial Enxuto, finalizado 24/06/2026). Versão enxuta sem prazo definido."},{"cli":"Indústria de Alumínios Eirilar S/A","assinado":"Sim","venc":"20/01/2026","status":"VENCIDO","obs":"⬆ CORRIGIDO: Clicksign 6/6 (finalizado 29/07/2024). Prazo 540d — vencido."},{"cli":"Grupo Pasinato","assinado":"Não","venc":"","status":"NÃO ASSINADO","obs":"Rascunho; sem evidência de assinatura."},{"cli":"Marcio Oliveira Participação LTDA (Oxxo)","assinado":"Sim","venc":"26/11/2028","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 27/11/2025). Estava como NÃO ASSINADO."},{"cli":"Marlene Vassoler / Fazenda Porteira Branca","assinado":"Não","venc":"","status":"NÃO ASSINADO","obs":"⚠ URGENTE: se assinado na base (05/02/2025), venceria 30/07/2026. Sem evidência de assinatura — confirmar já com jurídico."},{"cli":"Paiol Administração de Bens LTDA","assinado":"Não","venc":"","status":"NÃO ASSINADO","obs":"Enviado recentemente (base 08/07/2026), sem assinatura ainda."},{"cli":"Planície Mineração LTDA","assinado":"Sim","venc":"02/06/2028","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 03/06/2025). Estava como NÃO ASSINADO."},{"cli":"Plural GFP Engenharia (Elihu / Ubatuba)","assinado":"Parcial","venc":"","status":"PARCIAL","obs":"Clicksign 2/5 assinaturas — não finalizado. Faltam 3 signatários."},{"cli":"Smart Ventures LTDA","assinado":"Sim","venc":"04/12/2028","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 05/12/2025). Estava como NÃO ASSINADO."},{"cli":"Solvei Incorporadora","assinado":"Sim","venc":"05/02/2029","status":"VÁLIDO","obs":"⬆ CORRIGIDO: nova versão Clicksign 4/4 (finalizado 06/02/2026) — substitui a parcial de 2025."},{"cli":"Treviso Construtora LTDA","assinado":"Sim","venc":"18/02/2026","status":"VENCIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 22/08/2025). Prazo 180d — vencido."},{"cli":"X Group Company LTDA","assinado":"Sim","venc":"12/11/2028","status":"VÁLIDO","obs":"⬆ CORRIGIDO: Clicksign 4/4 (finalizado 13/11/2025). Estava como NÃO ASSINADO."}];
+
+const BRL=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+function fmtM(v){if(!v)return'—';if(v>=1000000)return'R$'+(v/1000000).toFixed(1).replace('.0','').replace('.',',')+'MM';if(v>=1000)return'R$'+Math.round(v/1000)+'k';return'R$'+v;}
+function fmtR(v){const neg=v<0;v=Math.abs(v);return(neg?'-':'')+'R$'+v.toLocaleString('pt-BR');}
+const stLabel={lead:"Lead",qual:"Pré-análise",prop:"Análise de crédito",mandato:"Mandato",fechado:"Fechado"};
+const PROB={lead:.10,qual:.25,prop:.50,mandato:.75,fechado:1.0};
+const STCOL={lead:'var(--lead)',qual:'var(--qual)',prop:'var(--prop)',mandato:'var(--mandato)',fechado:'var(--fechado)'};
+const MODCOL={dashboard:'var(--acc)',comercial:'var(--comercial)',operacional:'var(--operacional)',financeiro:'var(--financeiro)',juridico:'var(--juridico)',pessoas:'var(--rh)',portal:'var(--acc2)'};
+const icP={'Crédito':'🏦','Advisory/Investimento':'👥','A classificar':'📋'};
+function quarterInfo(){const m=new Date().getMonth();const q=Math.floor(m/3)+1;return{q,modo:q===1?"construcao":"regime"};}
+
+/* ---- export CSV ---- */
+function dl(name,txt){const b=new Blob(['﻿'+txt],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+function toCSV(head,rows){const esc=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';return [head.map(esc).join(';')].concat(rows.map(r=>r.map(esc).join(';'))).join('\n');}
+function exp(what){
+  if(what==='opp'){const d=PIPELINE.filter(r=>['lead','qual'].includes(r.e));dl('oportunidades.csv',toCSV(['Lead','Produto','Estágio','Crédito','Fee','Obs'],d.map(r=>[r.n,r.p,stLabel[r.e],r.c,r.f,r.o])));}
+  else if(what==='ops'){const d=PIPELINE.filter(r=>['prop','mandato','fechado'].includes(r.e));dl('operacoes.csv',toCSV(['Operação','Produto','Estágio','Crédito','Fee','Obs'],d.map(r=>[r.n,r.p,stLabel[r.e],r.c,r.f,r.o])));}
+  else if(what==='mov'){dl('movimentacao.csv',toCSV(['Mês','Entradas','Saídas','Líquido'],MOV.map(m=>[m.m,m.e,m.s,(m.e-m.s).toFixed(2)])));}
+  else if(what==='mand'){dl('mandatos.csv',toCSV(['Cliente','Assinado','Vencimento','Status','Observação'],MANDATOS.map(m=>[m.cli,m.assinado,m.venc,m.status,m.obs])));}
+  else if(what==='parc'){dl('parceiros.csv',toCSV(['Nome','Papel'],PARCEIROS.map(p=>[p.nm,p.d])));}
+}
+
+/* ---- Dashboard ---- */
+function renderDash(){
+  const total=PIPELINE.length, cred=PIPELINE.reduce((s,r)=>s+(r.c||0),0);
+  const feeB=PIPELINE.reduce((s,r)=>s+(r.f||0),0), feeP=PIPELINE.reduce((s,r)=>s+(r.f||0)*PROB[r.e],0);
+  const pct=Math.round(META.realizado/META.alvo*100);
+  const totE=MOV.reduce((s,m)=>s+m.e,0), totS=MOV.reduce((s,m)=>s+m.s,0);
+  const mVal=MANDATOS.filter(m=>m.status.startsWith('VÁLIDO')).length, mVenc=MANDATOS.filter(m=>m.status==='VENCIDO').length;
+  document.getElementById('dash-kpis').innerHTML=
+    `<div class="tile"><div class="k">Meta 2026</div><div class="v mono">${pct}%</div><div class="d">${fmtR(META.realizado)} de ${fmtM(META.alvo)}</div></div>
+     <div class="tile"><div class="k">Pipeline</div><div class="v">${total}</div><div class="d">operações · ${fmtM(cred)} crédito</div></div>
+     <div class="tile"><div class="k">Fee ponderado</div><div class="v mono" style="color:var(--ok)">${fmtM(feeP)}</div><div class="d">de ${fmtM(feeB)} bruto</div></div>
+     <div class="tile"><div class="k">Saldo conciliado</div><div class="v mono">${fmtR(Math.round(SALDO_CONC))}</div><div class="d">resultado ${fmtR(Math.round(totE-totS))}</div></div>
+     <div class="tile"><div class="k">Mandatos vigentes</div><div class="v" style="color:var(--ok)">${mVal}</div><div class="d">${mVenc} vencidos · ${MANDATOS.length} total</div></div>`;
+  document.getElementById('dm-real').textContent=fmtR(META.realizado)+' realizado';
+  document.getElementById('dm-pct').textContent=pct+'%'; document.getElementById('dm-fill').style.width=pct+'%';
+  const areas=[
+    {n:'Comercial',c:'var(--comercial)',v:PIPELINE.filter(r=>['lead','qual'].includes(r.e)).length+' leads',d:fmtM(PIPELINE.filter(r=>['lead','qual'].includes(r.e)).reduce((s,r)=>s+(r.c||0),0))+' em originação'},
+    {n:'Operacional',c:'var(--operacional)',v:PIPELINE.filter(r=>['prop','mandato'].includes(r.e)).length+' em esteira',d:fmtM(PIPELINE.filter(r=>['prop','mandato'].includes(r.e)).reduce((s,r)=>s+(r.f||0),0))+' fee a capturar'},
+    {n:'Financeiro',c:'var(--financeiro)',v:fmtR(Math.round(SALDO_CONC)),d:'entradas '+fmtM(totE)+' · saídas '+fmtM(totS)},
+    {n:'Jurídico',c:'var(--juridico)',v:mVal+' vigentes',d:MANDATOS.filter(m=>m.status==='NÃO ASSINADO').length+' pendentes de assinatura'},
+    {n:'Pessoas · RH',c:'var(--rh)',v:(EQUIPE.length+PARCEIROS.length)+' pessoas',d:FORNECEDORES.length+' fornecedores HCM'}
+  ];
+  document.getElementById('dash-areas').innerHTML=areas.map(a=>`<div class="areacard" style="border-top-color:${a.c}"><div class="an" style="color:${a.c}">${a.n}</div><div class="av">${a.v}</div><div class="ad">${a.d}</div></div>`).join('');
+  const stages=['lead','qual','prop','mandato','fechado'];
+  const dist=stages.map(s=>({s,v:PIPELINE.filter(r=>r.e===s).reduce((a,r)=>a+(r.f||0)*PROB[r.e],0)}));
+  const mx=Math.max(...dist.map(d=>d.v),1);
+  document.getElementById('dash-bars').innerHTML=dist.map(d=>`<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${stLabel[d.s]}</span><span class="mono" style="color:${STCOL[d.s]};font-weight:700">${fmtM(Math.round(d.v))}</span></div><div style="height:7px;background:var(--line);border-radius:4px;overflow:hidden"><div style="height:100%;width:${(d.v/mx*100).toFixed(0)}%;background:${STCOL[d.s]};border-radius:4px"></div></div></div>`).join('');
+  const prior=PIPELINE.filter(r=>['prop','mandato'].includes(r.e)).sort((a,b)=>(b.f||0)-(a.f||0)).slice(0,6);
+  document.getElementById('dash-prior').innerHTML=prior.map(r=>`<tr><td><div class="cli">${r.n}</div>${r.o?`<div class="note">${r.o}</div>`:''}</td><td><span class="badge b-${r.e}">${stLabel[r.e]}</span></td><td class="right mono">${fmtM(r.f)}</td></tr>`).join('')||'<tr><td class="note">—</td></tr>';
+}
+
+/* ---- Comercial ---- */
+function rowDeal(r){return `<tr><td class="cli">${r.n}</td><td>${icP[r.p]||''} ${r.p}</td><td><span class="badge b-${r.e}">${stLabel[r.e]}</span></td><td class="right mono">${r.c?fmtM(r.c):'—'}</td><td class="right mono">${r.f?fmtM(r.f):'—'}</td><td class="note">${r.o||'—'}</td></tr>`;}
+const AGENDA=[
+ {d:'2026-08-04',ini:'15:30',fim:'16:15',t:'Solicitação Crédito · Makasí & Tiago',o:'Boulevard · capital ponte',meet:'https://meet.google.com/vrv-jeyu-rat'},
+ {d:'2026-08-04',ini:'16:00',fim:'17:00',t:'Willian Costella · Incorporação VGV R$80M',o:'Chapecó/SC · financiamento à produção',meet:'https://meet.google.com/uxh-agik-qms'},
+ {d:'2026-08-04',ini:'17:00',fim:'18:00',t:'Daniel Costa · op Madero',o:'alinhar decisores Marlon e Leandro',meet:'https://meet.google.com/gxu-yovq-qer'},
+ {d:'2026-08-05',ini:'15:00',fim:'16:00',t:'Paulo Sérgio · Projeto Usinas',o:'garantia 4 usinas · Goiás Energy · definir composição da call',meet:'https://meet.google.com/swe-hatw-rxt'},
+ {d:'2026-08-10',ini:'15:00',fim:'16:00',t:'Alex · Jet Frio / M&A Jetfrio',o:'estratégia M&A (semanal)',meet:'https://meet.google.com/uae-fead-vmd'},
+ {d:'2026-08-17',ini:'15:00',fim:'16:00',t:'Alex · Jet Frio / M&A Jetfrio',o:'semanal',meet:'https://meet.google.com/uae-fead-vmd'},
+ {d:'2026-08-24',ini:'15:00',fim:'16:00',t:'Alex · Jet Frio / M&A Jetfrio',o:'semanal',meet:'https://meet.google.com/uae-fead-vmd'},
+ {d:'2026-08-31',ini:'15:00',fim:'16:00',t:'Alex · Jet Frio / M&A Jetfrio',o:'semanal',meet:'https://meet.google.com/uae-fead-vmd'}
+];
+const ST4=[['pre','Pré-análise'],['cred','Análise de crédito'],['gar','Análise da garantia'],['jur','Jurídico / Contrato'],['fat','Faturamento']];
+const ST4LBL=Object.fromEntries(ST4);
+const ST4COL={pre:'#8a94a6',cred:'#e8c84a',gar:'#6ea8ff',jur:'#e8863a',fat:'#39c07a'};
+function e2st4(r){if(r.st4)return r.st4;const m={qual:'pre',prop:'cred',mandato:'jur',lead:'pre',fechado:'fat'};return m[r.e]||'pre';}
+function loadST4(){try{const j=JSON.parse(localStorage.getItem('hc_st4v3')||'{}');PIPELINE.forEach(r=>{const o=j[r.n];if(o){if(o.s)r.st4=o.s;if('a'in o)r.a=o.a?1:0;}});}catch(e){}}
+function saveST4(){try{const o={};PIPELINE.forEach(r=>{o[r.n]={s:r.st4||'',a:r.a?1:0};});localStorage.setItem('hc_st4v3',JSON.stringify(o));}catch(e){}}
+function setStatus(i,v){PIPELINE[i].st4=v;saveST4();renderCom();salvarERP(true);}
+function moveToOpp(i){PIPELINE[i].a=0;saveST4();renderCom();salvarERP(true);}
+function moveToFunil(i){PIPELINE[i].a=1;if(!PIPELINE[i].st4)PIPELINE[i].st4='pre';saveST4();renderCom();salvarERP(true);}
+function loadImported(){try{var a=JSON.parse(localStorage.getItem('hc_imported')||'[]');a.forEach(function(o){PIPELINE.unshift(o);});}catch(e){}}
+function saveImported(op){try{var a=JSON.parse(localStorage.getItem('hc_imported')||'[]');a.push(op);localStorage.setItem('hc_imported',JSON.stringify(a));}catch(e){}}
+const SAVE_KEY='hc_erp_state_v1';
+function _fmtTs(t){try{return new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+function salvarERP(silent){try{var st={v:1,ts:new Date().toISOString(),PIPELINE:PIPELINE,CAMPANHAS:(typeof CAMPANHAS!=='undefined'?CAMPANHAS:[]),CONTAS:(typeof CONTAS!=='undefined'?CONTAS:[]),MANDATOS:(typeof MANDATOS!=='undefined'?MANDATOS:[]),mktFaixa:(typeof mktFaixa!=='undefined'?mktFaixa:null)};localStorage.setItem(SAVE_KEY,JSON.stringify(st));var el=document.getElementById('saveInfo');if(el)el.textContent='\u2713 salvo '+_fmtTs(st.ts);var b=document.getElementById('btnSalvar');if(b&&!silent){b.textContent='\u2713 Salvo';setTimeout(function(){b.textContent='\uD83D\uDCBE Salvar';},1400);}}catch(e){if(!silent)alert('Não consegui salvar (o navegador pode estar bloqueando o armazenamento local neste modo): '+e.message);}}
+function restaurarERP(){try{var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var st=JSON.parse(raw);function repl(arr,data){if(Array.isArray(data)&&Array.isArray(arr)){arr.length=0;data.forEach(function(o){arr.push(o);});}}repl(PIPELINE,st.PIPELINE);if(typeof CAMPANHAS!=='undefined')repl(CAMPANHAS,st.CAMPANHAS);if(typeof CONTAS!=='undefined')repl(CONTAS,st.CONTAS);if(typeof MANDATOS!=='undefined')repl(MANDATOS,st.MANDATOS);if(st.mktFaixa&&typeof mktFaixa!=='undefined')mktFaixa=st.mktFaixa;var el=document.getElementById('saveInfo');if(el)el.textContent='\u21A9 restaurado de '+_fmtTs(st.ts);}catch(e){}}
+function exportarBackup(){try{var st={v:1,ts:new Date().toISOString(),PIPELINE:PIPELINE,CAMPANHAS:(typeof CAMPANHAS!=='undefined'?CAMPANHAS:[]),CONTAS:(typeof CONTAS!=='undefined'?CONTAS:[]),MANDATOS:(typeof MANDATOS!=='undefined'?MANDATOS:[]),mktFaixa:(typeof mktFaixa!=='undefined'?mktFaixa:null)};var blob=new Blob([JSON.stringify(st,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='erp-home-capital-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();var el=document.getElementById('saveInfo');if(el)el.textContent='⤓ backup exportado';}catch(e){alert('Erro ao exportar: '+e.message);}}
+function importarBackup(file){if(!file)return;var r=new FileReader();r.onload=function(e){try{var st=JSON.parse(e.target.result);if(!st||!st.PIPELINE)throw new Error('nao parece um backup do ERP');function repl(arr,data){if(Array.isArray(data)&&Array.isArray(arr)){arr.length=0;data.forEach(function(o){arr.push(o);});}}repl(PIPELINE,st.PIPELINE);if(typeof CAMPANHAS!=='undefined')repl(CAMPANHAS,st.CAMPANHAS);if(typeof CONTAS!=='undefined')repl(CONTAS,st.CONTAS);if(typeof MANDATOS!=='undefined')repl(MANDATOS,st.MANDATOS);if(st.mktFaixa&&typeof mktFaixa!=='undefined')mktFaixa=st.mktFaixa;try{localStorage.setItem(SAVE_KEY,JSON.stringify(st));}catch(x){}renderTudo();var el=document.getElementById('saveInfo');if(el)el.textContent='⤓ backup importado '+_fmtTs(st.ts);alert('✓ Backup restaurado com sucesso.');}catch(err){alert('Arquivo de backup invalido: '+err.message);}};r.readAsText(file);}
+function importOpPortal(file){if(!file)return;var r=new FileReader();r.onload=function(e){try{var o=JSON.parse(e.target.result);var val=parseInt(String(o.op_valor||'').replace(/[^0-9]/g,''))||0;var garv=parseInt(String(o.op_gar_valor||'').replace(/[^0-9]/g,''))||0;var op={n:(o.cli_razao||'Operação portal').trim(),p:val?'Crédito':'A classificar',e:'qual',c:val,f:0,inv:0,st4:'pre',a:1,portal:1,o:'Portal · '+(o.broker_nome||'broker')+(o.op_produto?' · '+o.op_produto:'')+(o.op_garantia?' · garantia:'+o.op_garantia:'')};PIPELINE.unshift(op);saveImported(op);saveST4();renderCom();salvarERP(true);alert('\u2713 Operação "'+op.n+'" lançada no funil (Pré-análise)'+(val?' — crédito '+fmtM(val):'')+'.');}catch(err){alert('Arquivo inválido: '+err.message);}};r.readAsText(file);}
+try{restaurarERP();}catch(e){}
+function renderCom(){
+  const pre=PIPELINE.filter(r=>['lead','qual'].includes(r.e));
+  const nl=PIPELINE.filter(r=>r.e==='lead').length,nq=PIPELINE.filter(r=>r.e==='qual').length;
+  const pot=pre.reduce((s,r)=>s+(r.c||0),0);
+  const emAnd=PIPELINE.filter(r=>r.a),opps=PIPELINE.filter(r=>!r.a);
+  const totC=emAnd.reduce((s,r)=>s+(r.c||0),0),totI=emAnd.reduce((s,r)=>s+(r.inv||0),0),totF=emAnd.reduce((s,r)=>s+(r.f||0),0);
+  document.getElementById('com-kpis').innerHTML=
+    `<div class="tile"><div class="k">Operações em andamento</div><div class="v">${emAnd.length}</div><div class="d">coloridas na planilha</div></div>
+     <div class="tile"><div class="k">Crédito em andamento</div><div class="v mono">${fmtM(totC)}</div><div class="d">soma no funil</div></div>
+     <div class="tile"><div class="k">Fee em andamento</div><div class="v mono" style="color:var(--acc2)">${fmtM(totF)}</div><div class="d">se converter</div></div>
+     <div class="tile"><div class="k">Oportunidades</div><div class="v">${opps.length}</div><div class="d">pré-mandato · aba ao lado</div></div>`;
+  document.getElementById('com-fcount').textContent=emAnd.length+' operações em andamento';
+  document.getElementById('com-funnel').innerHTML=ST4.map(([k,lbl])=>{const n=emAnd.filter(r=>e2st4(r)===k).length;return `<div class="fn"><div class="c" style="color:${ST4COL[k]}">${n}</div><div class="l">${lbl}</div></div>`;}).join('');
+  {const idx2=new Map(PIPELINE.map((r,i)=>[r,i]));document.getElementById('com-opp-rows').innerHTML=opps.map(r=>rowDeal(r).replace('</tr>','<td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="moveToFunil('+idx2.get(r)+')">\u2192 Funil</button></td></tr>')).join('');}
+  {const idx=new Map(PIPELINE.map((r,i)=>[r,i]));const andRows=emAnd.slice().sort((a,b)=>(b.f||0)-(a.f||0));const ae=document.getElementById('com-and-rows');if(ae)ae.innerHTML=andRows.map(r=>{const i=idx.get(r),cur=e2st4(r);const sel='<select onchange="setStatus('+i+',this.value)" style="background:var(--panel2);border:1px solid '+ST4COL[cur]+'66;border-radius:6px;padding:4px 7px;color:var(--tx);font-size:11px;font-weight:600">'+ST4.map(([k,l])=>'<option value="'+k+'"'+(k===cur?' selected':'')+'>'+l+'</option>').join('')+'</select>';return `<tr><td class="cli">${r.n}${r.m?' <span class="badge b-mandato" style="font-size:9px">✓ mandato</span>':''}</td><td>${sel}</td><td class="right mono">${r.c?fmtM(r.c):'—'}</td><td class="right mono">${r.inv?fmtM(r.inv):'—'}</td><td class="right mono" style="color:var(--acc2)">${r.f?fmtM(r.f):'—'}</td><td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="moveToOpp(${i})">→ Oportunidade</button></td></tr>`;}).join('');const ac=document.getElementById('com-and-count');if(ac)ac.textContent=andRows.length+' operações · '+fmtM(totC+totI)+' em volume · altere o status no seletor';}
+  // marketing
+  const tl=CAMPANHAS.reduce((s,c)=>s+c.leads,0),tv=CAMPANHAS.reduce((s,c)=>s+c.verba,0),cm=tl?Math.round(tv/tl):0;
+  const cplc=c=>c<=380?'var(--ok)':(c<=400?'var(--warn)':'var(--bad)');
+  document.getElementById('mkt-stats').innerHTML=
+    `<div class="tile"><div class="k">Orçamento do mês</div><div class="v mono">${BRL(MKT.orcamento)}</div><div class="d">~12% da receita</div></div>
+     <div class="tile"><div class="k">Leads no mês</div><div class="v">${tl}</div><div class="d">${CAMPANHAS.filter(c=>c.status==='Ativa').length} ativas</div></div>
+     <div class="tile"><div class="k">CPL médio</div><div class="v mono" style="color:${cplc(cm)}">${BRL(cm)}</div><div class="d">meta ≤ R$ 400</div></div>
+     <div class="tile"><div class="k">Verba aplicada</div><div class="v mono">${BRL(tv)}</div><div class="d">de ${BRL(MKT.orcamento)}</div></div>`;
+  document.getElementById('mkt-kpis').innerHTML=MKT_KPIS.map(k=>`<div class="kpi"><div class="kk">${k.k}</div><div class="vv">${k.v}</div><div class="tg">${k.tg}</div></div>`).join('');
+  document.getElementById('camps').innerHTML=CAMPANHAS.map(c=>`<div class="camp"><div class="nm">${c.nm}</div><div class="st">${c.status}</div><div class="g"><div><div class="kk">Verba</div><div class="vv mono">${BRL(c.verba)}</div></div><div><div class="kk">Leads</div><div class="vv">${c.leads}</div></div><div><div class="kk">CPL</div><div class="vv mono" style="color:${cplc(c.cpl)}">${BRL(c.cpl)}</div></div><div><div class="kk">Status</div><div class="vv" style="font-size:12px">${c.status}</div></div></div></div>`).join('');
+}
+
+/* ---- Operacional ---- */
+function renderOp(){
+  const stages=['lead','qual','prop','mandato','fechado'];
+  document.getElementById('op-step').innerHTML=stages.map((s,i)=>{const n=PIPELINE.filter(r=>r.e===s).length;return `<div class="stepi" style="border-color:${STCOL[s]}44"><div class="n" style="color:${STCOL[s]}">${n}</div><div class="s">${stLabel[s]}</div></div>`;}).join('');
+  const ativos=PIPELINE.filter(r=>['prop','mandato'].includes(r.e)), fech=PIPELINE.filter(r=>r.e==='fechado');
+  document.getElementById('op-kpis').innerHTML=
+    `<div class="tile"><div class="k">Em esteira (análise/mandato)</div><div class="v">${ativos.length}</div><div class="d">operações ativas</div></div>
+     <div class="tile"><div class="k">Crédito em processamento</div><div class="v mono">${fmtM(ativos.reduce((s,r)=>s+(r.c||0),0))}</div><div class="d">volume</div></div>
+     <div class="tile"><div class="k">Fee a capturar</div><div class="v mono" style="color:var(--acc2)">${fmtM(ativos.reduce((s,r)=>s+(r.f||0),0))}</div><div class="d">mandato/proposta</div></div>
+     <div class="tile"><div class="k">Fechadas</div><div class="v" style="color:var(--ok)">${fech.length}</div><div class="d">fee recebido ${fmtM(fech.reduce((s,r)=>s+(r.f||0),0))}</div></div>`;
+  document.getElementById('op-ops-rows').innerHTML=PIPELINE.filter(r=>['prop','mandato','fechado'].includes(r.e)).map(rowDeal).join('');
+}
+
+/* ---- Financeiro ---- */
+let CONTAS=[{banco:"C6 · AC Consult (ag 1 / cc 315096241)",saldo:15062.83},{banco:"C6 · CDB / aplicação (caixa aplicado da AC Consult)",saldo:116076,tipo:"aplic"}];
+function renderContas(){document.getElementById('contas-lista').innerHTML=CONTAS.map((c,i)=>`<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)"><input value="${c.banco}" oninput="CONTAS[${i}].banco=this.value" style="flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px"><input type="number" value="${c.saldo}" oninput="CONTAS[${i}].saldo=parseFloat(this.value)||0;renderCon()" style="width:140px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px;text-align:right"><button onclick="CONTAS.splice(${i},1);renderContas();renderCon()" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--bad);cursor:pointer">×</button></div>`).join('');}
+function addConta(){CONTAS.push({banco:"Nova conta",saldo:0});renderContas();renderCon();}
+function renderCon(){
+  if(!document.getElementById('con-saldo'))return;
+  const saldo=CONTAS.reduce((s,c)=>s+(c.saldo||0),0);
+  const custos=parseFloat(document.getElementById('con-custos').value)||0, receita=parseFloat(document.getElementById('con-receita').value)||0, pct=parseFloat(document.getElementById('con-pct').value)||0;
+  const livre=Math.max(saldo-custos,0),teto=receita*0.12,verba=Math.max(Math.min(livre*pct/100,teto),0);
+  document.getElementById('con-saldo').textContent=fmtR(saldo);document.getElementById('con-livre').textContent=fmtR(livre);
+  document.getElementById('con-teto').textContent=fmtR(Math.round(teto));document.getElementById('con-verba').textContent=fmtR(Math.round(verba));
+  const nota=document.getElementById('con-nota');
+  if(verba<=0)nota.textContent='⚠ Sem caixa livre para campanhas neste mês — priorize recebimentos antes de investir em mídia.';
+  else if(livre*pct/100<teto)nota.textContent='Limite pelo CAIXA: verba travada pelo caixa livre.';
+  else nota.textContent='Limite pela POLÍTICA: caixa de sobra; verba no teto de 12%.';
+}
+function parseCSV(t){const f=(t.split(/\r?\n/)[0]||'');const d=(f.split(';').length>f.split(',').length)?';':(f.split('\t').length>1?'\t':',');return t.split(/\r?\n/).map(l=>l.split(d).map(c=>c.replace(/^"|"$/g,'').trim()));}
+function msgConc(t,c){const el=document.getElementById('conc-import-msg');if(el){el.textContent=t;el.style.color=c||'var(--tx2)';}}
+function pNum(v){if(typeof v==='number')return v;if(v==null)return 0;let s=String(v).replace(/[R$\s]/g,'').replace(/[()]/g,'');if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.');else s=s.replace(/,/g,'');const n=parseFloat(s);return isNaN(n)?0:n;}
+function importConc(file){if(!file)return;const ext=(file.name.split('.').pop()||'').toLowerCase();const r=new FileReader();
+  if(ext==='ofx'){r.onload=e=>applyOFX(e.target.result,file.name);r.readAsText(file);return;}
+  if(ext==='csv'||ext==='txt'){r.onload=e=>applyRows(parseCSV(e.target.result),file.name);r.readAsText(file);return;}
+  if(ext==='pdf'){if(typeof pdfjsLib==='undefined'){msgConc('Para PDF preciso da biblioteca online.','var(--warn)');return;}try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}catch(_){}r.onload=e=>readPDF(e.target.result).then(t=>applyPDF(t,file.name)).catch(err=>msgConc('Erro PDF: '+err.message,'var(--bad)'));r.readAsArrayBuffer(file);return;}
+  if(typeof XLSX==='undefined'){msgConc('Para .xlsx preciso da biblioteca online. Exporte como CSV.','var(--warn)');return;}
+  r.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),file.name);}catch(err){msgConc('Erro: '+err.message,'var(--bad)');}};r.readAsArrayBuffer(file);}
+function applyRows(rows,fname){rows=rows.filter(r=>r.some(c=>String(c).trim()!==''));if(!rows.length){msgConc('Arquivo vazio.','var(--warn)');return;}
+  let hi=rows.findIndex(r=>r.some(c=>/saldo|valor|banco|conta|cr[eé]dito|d[eé]bito/i.test(String(c))));if(hi<0)hi=0;
+  const head=rows[hi].map(c=>String(c).toLowerCase());const find=(...k)=>head.findIndex(h=>k.some(x=>h.includes(x)));
+  const iB=find('banco','conta','institui'),iS=find('saldo'),iV=find('valor','montante'),iC=find('crédito','credito','entrada'),iD=find('débito','debito','saída','saida');
+  const body=rows.slice(hi+1).filter(r=>r.some(c=>String(c).trim()!==''));let contas=[];
+  if(iB>=0&&iS>=0)contas=body.filter(r=>String(r[iB]).trim()).map(r=>({banco:String(r[iB]).trim(),saldo:pNum(r[iS])}));
+  else if(iS>=0){let last=0;body.forEach(r=>{const v=pNum(r[iS]);if(v)last=v;});contas=[{banco:'Extrato: '+fname,saldo:last}];}
+  else{let net=0;body.forEach(r=>{if(iC>=0||iD>=0)net+=(iC>=0?pNum(r[iC]):0)-(iD>=0?pNum(r[iD]):0);else if(iV>=0)net+=pNum(r[iV]);});contas=[{banco:'Extrato: '+fname,saldo:net}];}
+  if(!contas.length){msgConc('Não achei coluna de saldo/valor.','var(--warn)');return;}
+  CONTAS=contas;renderContas();renderCon();msgConc('✓ Importado: '+contas.length+' conta(s) · '+body.length+' linha(s) · saldo '+fmtR(Math.round(contas.reduce((s,c)=>s+c.saldo,0))),'var(--ok)');}
+function applyOFX(t,f){const bal=(t.match(/<BALAMT>([-\d.,]+)/i)||[])[1];const n=(t.match(/<STMTTRN>/gi)||[]).length;if(bal==null){msgConc('OFX sem saldo.','var(--warn)');return;}CONTAS=[{banco:'OFX: '+f,saldo:pNum(bal)}];renderContas();renderCon();msgConc('✓ OFX · saldo '+fmtR(Math.round(pNum(bal)))+' · '+n+' lançamentos','var(--ok)');}
+function readPDF(a){return pdfjsLib.getDocument({data:a}).promise.then(async pdf=>{let t='';for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();t+=' '+c.items.map(x=>x.str).join(' ');}return t;});}
+function applyPDF(t,f){const cur=/-?\s*R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g;const re=/saldo[^\d\-R$]{0,40}(-?\s*R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2})/gi;let m,last=null;while((m=re.exec(t)))last=m[1];let s=last!=null?pNum(last):null;if(s===null){const a=t.match(cur);if(a&&a.length)s=pNum(a[a.length-1]);}if(s===null){msgConc('Não achei saldo no PDF.','var(--warn)');return;}CONTAS=[{banco:'PDF: '+f,saldo:s}];renderContas();renderCon();msgConc('✓ PDF · saldo '+fmtR(Math.round(s)),'var(--ok)');}
+function renderFin(){
+  const totE=MOV.reduce((s,m)=>s+m.e,0),totS=MOV.reduce((s,m)=>s+m.s,0),custoMes=CUSTOS.reduce((s,c)=>s+c.v,0);
+  const caixaTotal=CONTAS.reduce((a,c)=>a+(c.saldo||0),0), aplic=CONTAS.filter(c=>c.tipo==='aplic').reduce((a,c)=>a+(c.saldo||0),0);
+  document.getElementById('fin-stats').innerHTML=
+    `<div class="tile"><div class="k">Saldo conta corrente</div><div class="v mono">${fmtR(Math.round(SALDO_CONC))}</div><div class="d">C6 · 21/07/2026 (conciliado)</div></div>
+     <div class="tile"><div class="k">Caixa em CDB (aplicado)</div><div class="v mono" style="color:var(--acc2)">${fmtR(Math.round(aplic))}</div><div class="d">confirmado no C6 · 21/07</div></div>
+     <div class="tile"><div class="k">Caixa TOTAL (conta + CDB)</div><div class="v mono" style="color:var(--ok)">${fmtR(Math.round(caixaTotal))}</div><div class="d">disponibilidade real</div></div>
+     <div class="tile"><div class="k">Entradas 2026</div><div class="v mono" style="color:var(--ok)">${fmtR(Math.round(totE))}</div><div class="d">jan–jul</div></div>
+     <div class="tile"><div class="k">Saídas 2026</div><div class="v mono" style="color:var(--bad)">${fmtR(Math.round(totS))}</div><div class="d">jan–jul</div></div>
+     <div class="tile"><div class="k">Resultado do período</div><div class="v mono" style="color:${totE-totS>=0?'var(--ok)':'var(--bad)'}">${fmtR(Math.round(totE-totS))}</div><div class="d">entradas − saídas</div></div>`;
+  document.getElementById('mov-rows').innerHTML='<tr><td style="color:var(--tx3);font-size:10px;text-transform:uppercase">Mês</td><td class="right" style="color:var(--tx3);font-size:10px">Entradas</td><td class="right" style="color:var(--tx3);font-size:10px">Saídas</td><td class="right" style="color:var(--tx3);font-size:10px">Líquido</td></tr>'+MOV.map(m=>`<tr><td>${m.m}</td><td class="right mono entrada">${fmtR(Math.round(m.e))}</td><td class="right mono saida">${fmtR(Math.round(m.s))}</td><td class="right mono" style="color:${m.e-m.s>=0?'var(--ok)':'var(--bad)'}">${fmtR(Math.round(m.e-m.s))}</td></tr>`).join('')+`<tr style="border-top:2px solid var(--line)"><td style="font-weight:700">Total</td><td class="right mono entrada" style="font-weight:700">${fmtR(Math.round(totE))}</td><td class="right mono saida" style="font-weight:700">${fmtR(Math.round(totS))}</td><td class="right mono" style="font-weight:700;color:${totE-totS>=0?'var(--ok)':'var(--bad)'}">${fmtR(Math.round(totE-totS))}</td></tr>`;
+  document.getElementById('cus-rows').innerHTML=CUSTOS.map(c=>`<tr><td>${c.n}</td><td><span class="badge b-warn">Mensal</span></td><td class="right mono saida">−${fmtR(c.v)}/mês</td></tr>`).join('')+`<tr><td style="font-weight:700">Total fixo mensal</td><td></td><td class="right mono" style="font-weight:700">−${fmtR(custoMes)}</td></tr>`;
+  const fatK=Object.keys(FAT),fatT=Object.values(FAT).reduce((a,b)=>a+b,0);
+  if(document.getElementById('fat-stats')){
+    document.getElementById('fat-stats').innerHTML=`<div class="tile"><div class="k">Faturamento 2026 (jan–jul)</div><div class="v mono">${fmtR(fatT)}</div><div class="d">receita operacional</div></div><div class="tile"><div class="k">Média mensal</div><div class="v mono">${fmtR(Math.round(fatT/fatK.length))}</div><div class="d">via AC Consult</div></div><div class="tile"><div class="k">% da meta anual</div><div class="v">${Math.round(fatT/META.alvo*100)}%</div><div class="d">meta ${fmtM(META.alvo)}</div></div>`;
+    document.getElementById('fat-rows').innerHTML='<tr><td style="color:var(--tx3);font-size:10px;text-transform:uppercase">Mês</td><td class="right" style="color:var(--tx3);font-size:10px">Receita operacional</td></tr>'+fatK.map(m=>`<tr><td>${m}</td><td class="right mono entrada">${fmtR(FAT[m])}</td></tr>`).join('')+`<tr style="border-top:2px solid var(--line)"><td style="font-weight:700">Total</td><td class="right mono entrada" style="font-weight:700">${fmtR(fatT)}</td></tr>`;
+  }
+}
+let pfMes=FIN_ORDEM[6];
+function renderPFmes(m){const it=FIN_PF[m]||[];const pg=it.filter(x=>x.pago),ap=it.filter(x=>!x.pago);const tp=pg.reduce((s,x)=>s+x.val,0),ta=ap.reduce((s,x)=>s+x.val,0);
+  const line=x=>`<tr><td>${x.desc}</td><td><span class="badge ${x.pago?'b-ok':'b-warn'}">${x.pago?'Pago':'A pagar'}</span></td><td class="right mono ${x.pago?'saida':'previsto'}">${fmtR(x.val)}</td></tr>`;
+  let h='<table><tbody>';
+  if(pg.length)h+=`<tr><td colspan="3" style="color:var(--tx3);font-size:10px;text-transform:uppercase">Pagos — ${fmtR(tp)}</td></tr>`+pg.map(line).join('');
+  if(ap.length)h+=`<tr><td colspan="3" style="color:var(--tx3);font-size:10px;text-transform:uppercase;padding-top:12px">A pagar — ${fmtR(ta)}</td></tr>`+ap.map(line).join('');
+  h+=`</tbody><tfoot><tr><td style="font-weight:700">Total ${m}</td><td></td><td class="right mono" style="font-weight:700">${fmtR(tp+ta)}</td></tr></tfoot></table>`;
+  document.getElementById('pf-detalhe').innerHTML=h;}
+function renderPF(){document.getElementById('pf-meses').innerHTML=FIN_ORDEM.map(m=>`<div class="subtab ${m===pfMes?'on':''}" onclick="pfMes='${m}';renderPF()">${m}</div>`).join('');
+  let tp=0,ta=0;Object.values(FIN_PF).forEach(a=>a.forEach(x=>x.pago?tp+=x.val:ta+=x.val));
+  document.getElementById('pf-tot').textContent=`pago ${fmtR(Math.round(tp/1000))}k · a pagar ${fmtR(Math.round(ta/1000))}k`;renderPFmes(pfMes);}
+
+/* ---- Jurídico ---- */
+function jurBadge(st){if(st.startsWith('VÁLIDO'))return'b-ok';if(st==='VENCIDO')return'b-bad';return'b-warn';}
+function renderJur(){
+  const val=MANDATOS.filter(m=>m.status.startsWith('VÁLIDO')).length,venc=MANDATOS.filter(m=>m.status==='VENCIDO').length,na=MANDATOS.filter(m=>m.status==='NÃO ASSINADO'||m.status==='PARCIAL').length;
+  document.getElementById('jur-kpis').innerHTML=
+    `<div class="tile"><div class="k">Mandatos vigentes</div><div class="v" style="color:var(--ok)">${val}</div><div class="d">assinados e válidos</div></div>
+     <div class="tile"><div class="k">Vencidos</div><div class="v" style="color:var(--bad)">${venc}</div><div class="d">renovar/rescindir</div></div>
+     <div class="tile"><div class="k">Não assinados</div><div class="v" style="color:var(--warn)">${na}</div><div class="d">rascunho/pendente</div></div>
+     <div class="tile"><div class="k">Total de mandatos</div><div class="v">${MANDATOS.length}</div><div class="d">na base OneDrive</div></div>`;
+  const steps=[['Rascunho/Enviado',na],['Assinado',val+venc],['Vigente',val],['Vencido',venc]];
+  const cols=['var(--warn)','var(--info)','var(--ok)','var(--bad)'];
+  document.getElementById('jur-step').innerHTML=steps.map((s,i)=>`<div class="stepi" style="border-color:${cols[i]}44"><div class="n" style="color:${cols[i]}">${s[1]}</div><div class="s">${s[0]}</div></div>`).join('');
+  document.getElementById('jur-rows').innerHTML=MANDATOS.map(m=>`<tr><td class="cli">${m.cli}</td><td>${m.assinado}</td><td class="mono">${m.venc||'—'}</td><td><span class="badge ${jurBadge(m.status)}">${m.status}</span></td><td class="note">${m.obs||'—'}</td></tr>`).join('');
+}
+
+/* ---- Pessoas ---- */
+function personRow(p,tag){return `<div class="person"><div class="avatar">${p.ini}</div><div style="flex:1"><div class="pn">${p.nm}</div><div class="pc">${p.d||p.cargo}</div></div>${(p.tag||tag)?`<span class="badge ${(p.tag||tag)==='Principal'?'b-principal':'b-ok'}">${p.tag||tag}</span>`:''}</div>`;}
+function renderPessoas(){
+  document.getElementById('rh-kpis').innerHTML=
+    `<div class="tile"><div class="k">Equipe</div><div class="v">${EQUIPE.length}</div><div class="d">sócios/colaboradores</div></div>
+     <div class="tile"><div class="k">Fornecedores HCM</div><div class="v">${FORNECEDORES.length}</div><div class="d">credores Home Equity</div></div>
+     <div class="tile"><div class="k">Brokers / Parceiros</div><div class="v">${PARCEIROS.length}</div><div class="d">canal externo</div></div>`;
+  document.getElementById('equipe').innerHTML=EQUIPE.map(p=>personRow(p)).join('');
+  document.getElementById('fornecedores').innerHTML=FORNECEDORES.map(p=>personRow(p)).join('');
+  document.getElementById('parceiros').innerHTML=PARCEIROS.map(p=>personRow(p,'Parceiro')).join('');
+}
+
+/* ---- nav / subtabs ---- */
+function renderHeader(){const {q,modo}=quarterInfo();document.getElementById('qpill').textContent=`T${q} · ${new Date().getFullYear()}`;
+  const mp=document.getElementById('modepill');if(modo==='construcao'){mp.textContent='Modo Construção';mp.className='pill mode-c';}else{mp.textContent='Modo Regime';mp.className='pill mode-r';}
+  document.getElementById('footdate').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
+const titles={dashboard:"Painel Executivo",comercial:"Comercial",operacional:"Operacional · Crédito",financeiro:"Financeiro",juridico:"Jurídico",pessoas:"Pessoas · RH",portal:"Portal · Site Home Capital"};
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('hide',s.dataset.tab!==t));
+  document.getElementById('ttl').textContent=titles[t];document.getElementById('modcolor').style.background=MODCOL[t];});
+function subtabWire(nav, map){document.getElementById(nav).addEventListener('click',e=>{const b=e.target.closest('.subtab');if(!b)return;const s=b.dataset.s;
+  document.querySelectorAll('#'+nav+' .subtab').forEach(x=>x.classList.toggle('on',x===b));
+  Object.entries(map).forEach(([k,id])=>document.getElementById(id).classList.toggle('hide',k!==s));});}
+subtabWire('st-com',{funil:'com-funil',opp:'com-opp',agenda:'com-agenda',mkt:'com-mkt'});
+subtabWire('st-op',{esteira:'op-esteira',ops:'op-ops'});
+subtabWire('st-fin',{conc:'fin-conc',mov:'fin-mov',cus:'fin-cus',pf:'fin-pf'});
+subtabWire('st-rh',{eq:'rh-eq',forn:'rh-forn',brk:'rh-brk'});
+subtabWire('st-portal',{orig:'portal-orig',site:'portal-site'});
+function copiarLink(u){const el=document.getElementById('cplink');const ok=()=>{if(el){el.textContent='✓ Copiado!';setTimeout(()=>el.textContent='Copiar link 📋',1800);}};try{navigator.clipboard.writeText(u).then(ok,()=>{prompt('Copie o link:',u);});}catch(e){prompt('Copie o link:',u);}}
+
+
+/* ===== MARKETING — motor de campanha (política HCM) ===== */
+const MKT_FAIXAS={contencao:['Contenção',0.03,'Gatilho de corte acionado'],base:['Base',0.08,'Faixa padrão'],escalonada:['Escalonada',0.12,'CAC < R$4.000'],maxima:['Máxima',0.15,'CAC < R$4.000 e payback < 90d']};
+const MKT_PACOTES=[['Habilitação de brokers',0.35],['Recrutamento de brokers',0.25],['Conteúdo e autoridade',0.25],['Tráfego pago (teste)',0.15]];
+const MKT_VEDADOS=[['home equity','HCM / Respaldo Patrimonial'],['cgi','Respaldo Patrimonial'],['crédito com garantia','Respaldo Patrimonial'],['refinanciamento','estrutura de respaldo'],['empréstimo','capital ponte'],['financiamento','capital']];
+const MKT_ANGULOS=['Urgência — "O terreno não espera o banco."','Ativo ocioso — "Seu patrimônio parado destrava a próxima obra."','Margem — "Capital ponte sem diluir sua margem."','Técnico — "Não use seu limite bancário na fase errada."'];
+let mktFaixa='base'; /* padrão fixado em 8% = benchmark do segmento (serviços financeiros 7,1–8,0% da receita; Gartner 2025 7,7% média geral; pequenas ~9,4%). Escala p/ 12–15% só com CAC<R$4k por 2 meses. */
+function receita3m(){const c=['Abr/26','Mai/26','Jun/26'];const v=c.map(m=>(typeof FAT!=='undefined'&&FAT[m])||0);return v.reduce((a,b)=>a+b,0)/v.length;}
+function faixaSugerida(){ // gatilho de corte: 2 meses de resultado < 15k
+  const last2=MOV.slice(-2).map(m=>m.e-m.s); if(last2.every(x=>x<15000)) return 'contencao'; return 'base';}
+function checkVedados(txt){const t=(txt||'').toLowerCase();return MKT_VEDADOS.filter(v=>t.includes(v[0]));}
+function renderMkt2(){
+  if(!document.getElementById('mkt-budget'))return;
+  if(mktFaixa===null)mktFaixa=faixaSugerida();
+  const rec=receita3m(), pct=MKT_FAIXAS[mktFaixa][1], orc=rec*pct, trafego=orc*0.15;
+  const caixaLivre=(function(){const s=CONTAS.reduce((a,c)=>a+(c.tipo==='aplic'?0:(c.saldo||0)),0);const cu=parseFloat((document.getElementById('con-custos')||{}).value)||22942;return Math.max(s-cu,0);})();
+  document.getElementById('mkt-stats').innerHTML=
+    `<div class="tile"><div class="k">Receita média (3m)</div><div class="v mono">${fmtR(Math.round(rec))}</div><div class="d">Abr–Jun · base móvel</div></div>
+     <div class="tile"><div class="k">Faixa vigente</div><div class="v" style="font-size:18px">${MKT_FAIXAS[mktFaixa][0]} · ${(pct*100)}%</div><div class="d">${MKT_FAIXAS[mktFaixa][2]}</div></div>
+     <div class="tile"><div class="k">Orçamento mkt/mês</div><div class="v mono">${fmtR(Math.round(orc))}</div><div class="d">${(pct*100)}% da receita 3m</div></div>
+     <div class="tile"><div class="k">Verba de tráfego pago</div><div class="v mono" style="color:var(--acc2)">${fmtR(Math.round(trafego))}</div><div class="d">15% do orçamento · teto de campanha</div></div>`;
+  const alerta = trafego>caixaLivre ? `<div class="banner amber" style="margin:0 0 12px">⚠️ Caixa livre (${fmtR(Math.round(caixaLivre))}) menor que a verba de tráfego — priorize recebimentos antes de subir campanha.</div>`:'';
+  const selFaixa='<div style="margin-bottom:12px"><label style="font-size:10.5px;color:var(--tx3);text-transform:uppercase;font-weight:600">Faixa (ajuste conforme performance)</label> '+
+    '<select onchange="mktFaixa=this.value;renderMkt2()" style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--tx);margin-left:6px">'+
+    Object.entries(MKT_FAIXAS).map(([k,v])=>`<option value="${k}" ${k===mktFaixa?'selected':''}>${v[0]} (${v[1]*100}%) — ${v[2]}</option>`).join('')+'</select>'+
+    '<div style="font-size:10.5px;color:var(--tx3);margin-top:6px;line-height:1.5">Benchmark do segmento: serviços financeiros <b>7–8%</b> da receita · Gartner 2025 <b>7,7%</b> média geral · pequenas empresas ~9,4%. <b>Base 8% = padrão do seu setor</b> — e cresce sozinha para 12/15% quando o CAC ficar &lt; R$4k por 2 meses. 15% fixo agora seria a faixa Máxima (CAC comprovado), acima da norma B2B.</div></div>';
+  document.getElementById('mkt-budget').innerHTML=alerta+selFaixa+MKT_PACOTES.map(([n,p])=>{
+    const val=orc*p; return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${n} · ${p*100}%</span><span class="mono" style="font-weight:700">${fmtR(Math.round(val))}</span></div><div style="height:7px;background:var(--line);border-radius:4px;overflow:hidden"><div style="height:100%;width:${p*100}%;background:${n.includes('Tráfego')?'var(--acc)':'var(--info)'};border-radius:4px"></div></div></div>`;
+  }).join('');
+  renderCamps();
+  const chk=['Objetivo é Cadastros (Leads) — nunca engajamento/alcance/mensagem','Formulário instantâneo com a pergunta de garantia (Respaldo Patrimonial)','Verba dentro do pacote de tráfego (15%)','Nenhum termo vedado no nome/criativo (varrer nomenclatura)','Visual evita dinheiro/banco/aperto de mão','Rodar 14 dias sem mexer no público/criativo'];
+  document.getElementById('mkt-check').innerHTML=chk.map(c=>`<div class="row"><span class="dot2 pend">!</span><span class="txt">${c}</span></div>`).join('');
+}
+function renderCamps(){
+  const el=document.getElementById('camps'); if(!el)return;
+  if(!CAMPANHAS.length){el.innerHTML='<div style="padding:16px;color:var(--tx2);font-size:13px">Nenhuma campanha. Crie uma em <b>+ Nova campanha</b> (config conforme política HCM) ou importe o relatório do Meta.</div>';return;}
+  const cplc=c=>c<=380?'var(--ok)':(c<=400?'var(--warn)':'var(--bad)');
+  el.innerHTML=CAMPANHAS.map(c=>`<div class="camp"><div class="nm">${c.nm}</div><div class="st">${c.status||'—'}</div><div class="g">
+    <div><div class="kk">Verba</div><div class="vv mono">${c.verba?BRL(c.verba):'—'}</div></div>
+    <div><div class="kk">Leads</div><div class="vv">${c.leads||0}</div></div>
+    <div><div class="kk">CPL</div><div class="vv mono" style="color:${c.cpl?cplc(c.cpl):'var(--tx2)'}">${c.cpl?BRL(c.cpl):'—'}</div></div>
+    <div><div class="kk">Status</div><div class="vv" style="font-size:12px">${c.status||'—'}</div></div></div>
+    ${c.brief?`<div style="font-size:11px;color:var(--tx2);margin-top:10px;border-top:1px solid var(--line);padding-top:8px;white-space:pre-line">${c.brief}</div>`:''}</div>`).join('');
+}
+function toggleCampForm(){const f=document.getElementById('camp-form');f.classList.toggle('hide');if(!f.classList.contains('hide'))f.innerHTML=campFormHTML();}
+function campFormHTML(){
+  const rec=receita3m(),trafego=rec*MKT_FAIXAS[mktFaixa][1]*0.15;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field" style="margin:0"><label>Nome da campanha</label><input id="cf-nome" placeholder="Ex: Capital Ponte · Incorporadores · SP" oninput="cfCheck()"></div>
+    <div class="field" style="margin:0"><label>Ângulo do criativo</label><select id="cf-ang">${MKT_ANGULOS.map((a,i)=>`<option value="${i}">${a}</option>`).join('')}</select></div>
+    <div class="field" style="margin:0"><label>Verba diária (R$)</label><input id="cf-verba" type="number" value="${Math.max(Math.round(trafego/30),20)}"></div>
+    <div class="field" style="margin:0"><label>Praça / público</label><input id="cf-praca" value="Incorporação, construção civil, imobiliário · 30–60 anos"></div>
+  </div>
+  <div id="cf-warn" style="font-size:11.5px;color:var(--bad);margin-top:8px"></div>
+  <div style="font-size:11px;color:var(--tx3);margin-top:8px">Objetivo fixo: <b>Cadastros (Leads)</b> · Formato: <b>formulário instantâneo</b> · Posicionamento automático · rodar 14 dias sem mexer.</div>
+  <div style="margin-top:12px"><button class="btn" onclick="gerarCamp()">Gerar campanha (brief pronto)</button> <button class="btn" onclick="toggleCampForm()">Cancelar</button></div>`;
+}
+function cfCheck(){const v=checkVedados(document.getElementById('cf-nome').value);document.getElementById('cf-warn').textContent=v.length?('⚠ Termo vedado: '+v.map(x=>x[0]+' → use "'+x[1]+'"').join(' · ')):'';}
+function gerarCamp(){
+  const nome=document.getElementById('cf-nome').value.trim(); if(!nome){alert('Informe o nome');return;}
+  const ved=checkVedados(nome); if(ved.length){document.getElementById('cf-warn').textContent='⚠ Corrija o termo vedado antes de gerar: '+ved.map(x=>x[0]).join(', ');return;}
+  const ang=MKT_ANGULOS[parseInt(document.getElementById('cf-ang').value)];
+  const verba=parseFloat(document.getElementById('cf-verba').value)||0;
+  const praca=document.getElementById('cf-praca').value;
+  const brief=`OBJETIVO: Cadastros (Leads) · Formulário instantâneo\nPÚBLICO: ${praca}\nVERBA: ${BRL(verba)}/dia (pacote tráfego)\nCRIATIVO: ${ang}\nFORMULÁRIO:\n1) Você tem respaldo patrimonial (seu, da empresa ou em estoque) para o Capital Ponte? (Sim/Parcial/Não) — quem responde Não não avança\n2) Quanto precisa captar? (até 500k / 500k–2MM / +2MM)\n3) Para qual fase? (terreno / aprovação e registro / início de obra)\n4) Nome e WhatsApp\nREGRA: rodar 14 dias sem mexer.`;
+  CAMPANHAS.unshift({nm:nome,status:'Pronta pra publicar',verba:0,leads:0,cpl:0,brief:brief});
+  toggleCampForm();renderCamps();
+}
+function importMeta(file){
+  if(!file)return;const ext=(file.name.split('.').pop()||'').toLowerCase();const r=new FileReader();
+  const done=rows=>applyMeta(rows,file.name);
+  if(ext==='csv'||ext==='txt'){r.onload=e=>done(parseCSV(e.target.result));r.readAsText(file);return;}
+  if(typeof XLSX==='undefined'){document.getElementById('meta-msg').textContent='Para .xlsx preciso da biblioteca online — exporte como CSV.';return;}
+  r.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){document.getElementById('meta-msg').textContent='Erro: '+err.message;}};r.readAsArrayBuffer(file);
+}
+function applyMeta(rows,fname){
+  rows=rows.filter(r=>r.some(c=>String(c).trim()!==''));if(!rows.length)return;
+  const head=rows[0].map(c=>String(c).toLowerCase());
+  const find=(...k)=>head.findIndex(h=>k.some(x=>h.includes(x)));
+  const iN=find('campanha','nome'),iV=find('valor usado','gasto','amount spent','valor gasto'),iR=find('resultado','results','cadastro','lead'),iC=find('custo por resultado','cpl','cost per');
+  const body=rows.slice(1).filter(r=>r.some(c=>String(c).trim()!==''));
+  const novas=body.filter(r=>iN<0||String(r[iN]).trim()).map(r=>{
+    const verba=iV>=0?pNum(r[iV]):0, leads=iR>=0?Math.round(pNum(r[iR])):0;
+    let cpl=iC>=0?pNum(r[iC]):0; if(!cpl&&leads)cpl=Math.round(verba/leads);
+    return {nm:iN>=0?String(r[iN]).trim():'Campanha',status:'Ativa (Meta)',verba:Math.round(verba),leads:leads,cpl:Math.round(cpl)};
+  });
+  if(novas.length){CAMPANHAS=novas.concat(CAMPANHAS.filter(c=>c.status==='Pronta pra publicar'));renderCamps();renderMkt2();document.getElementById('meta-msg').textContent='✓ Relatório importado: '+novas.length+' campanha(s) do Meta.';document.getElementById('meta-msg').style.color='var(--ok)';}
+  else document.getElementById('meta-msg').textContent='Não encontrei campanhas no arquivo (esperado: colunas Nome, Valor usado, Resultados, Custo por resultado).';
+}
+
+window.addEventListener('beforeunload',function(){salvarERP(true);});
+function renderVal(){
+  const el=document.getElementById('fin-val'); if(!el)return;
+  const fator=12/6.5;
+  const recReal=(typeof META!=='undefined'&&META.realizado)||400569;
+  const recAno=recReal*fator;
+  const margLiq=19.9, margAntes=52.3;
+  const ebitdaAjAno=recAno*0.361;           // pró-labore normalizado a mercado
+  const vLow=0.5*recAno, vHigh=5*ebitdaAjAno;
+  const caixa=(typeof CONTAS!=='undefined')?CONTAS.reduce((a,c)=>a+(c.saldo||0),0):0;
+  el.innerHTML=
+    `<div class="tile"><div class="k">Margem (após pró-labore)</div><div class="v" style="color:var(--ok)">${margLiq}%</div><div class="d">líquida da operação</div></div>
+     <div class="tile"><div class="k">Margem (antes pró-labore)</div><div class="v" style="color:var(--acc2)">${margAntes}%</div><div class="d">margem do negócio</div></div>
+     <div class="tile"><div class="k">Receita anualizada</div><div class="v mono">${fmtM(recAno)}</div><div class="d">run-rate 2026</div></div>
+     <div class="tile"><div class="k">Valuation estimado</div><div class="v mono" style="font-size:17px">${fmtM(vLow)}–${fmtM(vHigh)}</div><div class="d">+ caixa ${fmtM(caixa)}</div></div>`;
+  const n=document.getElementById('fin-val-note');
+  if(n)n.innerHTML='Faixas: receita 0,5–1,5x · lucro 3–5x · EBITDA ajustado 3–5x. Meio da faixa (~R$0,8–1,0MM) é o mais defensável. <b>Desconto de pessoa-chave</b>: boutique dependente do fundador puxa para baixo. Pipeline de R$6,9MM é upside <b>não</b> realizado. Base: 6,5 meses de 2026 anualizados — não é ano fechado auditado. Leitura gerencial, não laudo.';
+}
+function renderAgenda(){
+  const el=document.getElementById('agenda-list'); if(!el)return;
+  const dias={}; AGENDA.forEach(e=>{(dias[e.d]=dias[e.d]||[]).push(e);});
+  const wd=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  let html='';
+  Object.keys(dias).sort().forEach(d=>{
+    const dt=new Date(d+'T12:00:00'); const p=d.split('-');
+    html+=`<div style="font-size:11px;color:var(--acc2);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin:16px 0 8px">${wd[dt.getDay()]} · ${p[2]}/${p[1]}</div>`;
+    dias[d].forEach(e=>{
+      html+=`<div style="display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:8px">
+        <div style="font-family:monospace;font-size:12px;color:var(--tx2);white-space:nowrap;min-width:96px">${e.ini}–${e.fim}</div>
+        <div style="flex:1"><div style="font-size:13.5px;font-weight:600">${e.t}</div><div style="font-size:11.5px;color:var(--tx3)">${e.o||''}</div></div>
+        ${e.meet?`<a href="${e.meet}" target="_blank" rel="noopener" style="text-decoration:none;background:var(--acc);color:#fff;font-size:11.5px;font-weight:700;padding:7px 13px;border-radius:8px;white-space:nowrap">📹 Entrar no Meet</a>`:''}
+      </div>`;
+    });
+  });
+  el.innerHTML=html||'<div style="color:var(--tx3);font-size:13px;padding:10px">Sem eventos.</div>';
+  const sy=document.getElementById('agenda-sync'); if(sy)sy.textContent='sincronizado da Google Agenda · 04/08 (snapshot)';
+}
+function renderTudo(){renderHeader();renderDash();renderCom();renderOp();renderContas();renderCon();renderFin();renderPF();renderJur();renderPessoas();renderMkt2();renderVal();renderAgenda();}
+renderTudo();
+
+/* PWA: registra o service worker para instalação e uso offline */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(e){console.log('SW falhou:',e&&e.message);});
+  });
+}
+</script></body></html>
