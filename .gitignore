@@ -1,0 +1,7 @@
+# Saída gerada da versão móvel criptografada (reproduzível via scripts/build_mobile.py)
+mobile/
+
+# Temporários
+node_modules/
+*.log
+.DS_Store
