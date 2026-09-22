@@ -5,3 +5,6 @@ mobile/
 node_modules/
 *.log
 .DS_Store
+
+# Pacote gerado para publicação
+*.zip
